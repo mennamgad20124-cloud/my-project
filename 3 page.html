@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title>الأمية الابجدية 1 للعاديين</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f0f0f0;
+            direction: rtl;
+            overflow-y: auto; 
+            overflow-x: auto; /* هذا السطر يسمح بالتمرير يميناً ويساراً عند التكبير */
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 50px;
+            scroll-behavior: smooth;
+    display: flex; /* هام جداً: يجعل الجسم يتمدد مع تكبير المحتوى بالـ zoom */
+     align-items: center; /* يخلي كل حاجة في النص */
+}
+        .image-1 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover; }
+
+        .top-bars-container { 
+            position: relative; 
+            top: 20px; 
+            width: 100%; 
+            padding: 0 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 2000;
+        }
+        .glass-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); height: 70px; min-width: 350px; padding: 0 10px; border-radius: 60px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 20px; border: 2px solid #BCE5FF;}
+        .logos-bar img { height: 45px; width: auto; object-fit: contain; }
+        .logo-mubadara, .logo-4 { height: 60px !important; }
+        
+        .search-box { display: flex; align-items: center; background: #f0f2f5; border-radius: 25px; padding: 5px 15px;}
+        .search-box input { border: none; outline: none; font-family: 'Cairo'; font-size: 14px; width: 100px; background: transparent; }
+        .search-box i { color: #52BBFF; }
+        .accessibility-tools { display: flex; gap: 10px; align-items: center; }
+        .size-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #52BBFF; color: #ffffff; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+
+        h1.main-title { margin-top: 7px; color: #47b3fb; text-align: center; text-shadow: 4px 4px 6px #bce6fd; margin-bottom: 10px; font-size: 2.5rem; width: fit-content; margin-left: auto; margin-right: auto; border-bottom: 3px solid #47b3fb; padding-bottom: 5px; }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 15px 35px;
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            width: 900px;
+            height: 55px;
+        }
+
+        .progress-wrapper { 
+            width: 600px; 
+            height: 35px; 
+            background: #e0e0e0; 
+            border-radius: 25px; 
+            overflow: hidden; 
+            border: 3px solid #fff; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        #progress-bar { 
+            width: 0%; 
+            height: 100%; 
+            background: linear-gradient(270deg, #47b3fb, #2ecc71, #f1c40f, #e67e22);
+            background-size: 800% 800%;
+            animation: moveGradient 10s ease infinite;
+            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        #progress-text { 
+            font-weight: 700; 
+            color: #174572; 
+            font-size: 1.6rem; 
+            text-shadow: 1px 1px 0px #fff;
+            white-space: nowrap;
+        }
+
+        .highlight-num { color: #2ecc71; font-size: 2rem; margin: 0 5px; }
+
+        @keyframes moveGradient {
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+
+        .content-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: auto; 
+            min-height: calc(100vh - 200px);
+            margin-bottom: 50px;
+        }
+
+        .video-display-area {
+            position: absolute;
+            z-index: 1000;
+            width: 410px;
+            display: none;
+            text-align: center;
+            background: #ffffff; 
+            padding: 20px;
+            border-radius: 25px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            animation: fadeIn 0.4s ease;
+            border: 2px solid #BCE5FF;
+            margin-top: -120px;
+        }
+
+        .visual-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        .visual-icon { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; border: 1px solid #ddd; }
+        .audio-btn { background: #52BBFF; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+
+        .mini-quiz { background: white; border-radius: 15px; padding: 15px; margin-top: 15px; border: 2px dashed #47b3fb; }
+        
+        .quiz-option { 
+            display: block; 
+            padding: 12px; 
+            margin: 10px 0; 
+            background: #fdfdfd; 
+            border: 2px solid #e0e0e0;
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            transition: 0.3s; 
+            text-align: center;
+            box-shadow: 0 4px 0 #ddd;
+        }
+
+        .quiz-option:hover { background: #e7f6fe; transform: translateY(-2px); }
+        .quiz-option:active { transform: translateY(2px); box-shadow: none; }
+        
+        .correct-answer { 
+            background: #2ecc71 !important; 
+            color: white !important; 
+            border-color: #27ae60 !important;
+            animation: pulse-green 0.6s infinite alternate;
+        }
+        
+        .wrong-answer { 
+            background: #ff4d4d !important; 
+            color: white !important; 
+            animation: shake 0.4s; 
+        }
+
+        @keyframes pulse-green {
+            from { transform: scale(1); box-shadow: 0 0 10px #2ecc71; }
+            to { transform: scale(1.05); box-shadow: 0 0 20px #2ecc71; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .daily-sentence { font-size: 1.4rem; color: #2c3e50; font-weight: bold; margin-top: 10px; background: #e1f5fe; padding: 5px; border-radius: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; margin-top: 10px; }
+        .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; background: #000; }
+        .close-video { position: absolute; top: 5px; left: 5px; cursor: pointer; color: #ff4d4d; font-size: 22px; z-index: 10; }
+
+        .alphabet-grid { display: flex; flex-wrap: wrap; gap: 30px; width: 100%; max-width: 900px; margin-top: 20px; justify-content: center; padding-bottom: 100px; }
+
+        .letter-card {
+            background: #e7f6fe; height: 95px; width: 120px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: bold; color: transparent; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+        }
+
+        .letter-card.revealed { color: #3498db !important; background-color: #f8fbff; border-color: #3498db; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        #connection-line { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 500; }
+        #line-element { stroke: #3498db; stroke-width: 3; stroke-dasharray: 8, 5; transition: all 0.3s ease; }
+
+        .next-step-hint { animation: hintPulse 0.5s ease-in-out; border-color: #2ecc71 !important; box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3); z-index: 10; }
+        @keyframes hintPulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* الشاشة الخضراء النهائية */
+        #finish-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 204, 113, 0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        #finish-screen h2 { font-size: 5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        #finish-screen p { font-size: 2rem; margin-bottom: 40px; }
+        .nav-btn {
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; background: white;
+            color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .nav-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+
+  </style>
+</head>
+<body>
+
+<div class="image-1"><img src="1-images/10.jpg" alt="خلفية"></div>
+
+<div id="finish-screen">
+    <i class="fas fa-check-circle" style="font-size: 8rem; margin-bottom: 20px;"></i>
+    <h2>أحسنت!</h2>
+    <p>لقد أتممت تعلم جميع الحروف بنجاح</p>
+    
+    <a href="page220.html" style="text-decoration: none;">
+        <button class="nav-btn">الانتقال للمستوى التالي <i class="fas fa-arrow-left"></i></button>
+    </a>
+</div>
+
+
+<div class="top-bars-container">
+    <div class="glass-bar tools-bar"> 
+        <div class="accessibility-tools">
+            <button class="size-btn" onclick="changeFontSize(1.3)">A+</button>
+            <button class="size-btn" onclick="changeFontSize(1.0)">A</button>
+            <button class="size-btn" onclick="changeFontSize(0.8)">A-</button>
+        </div>
+        <div class="search-box"><input type="text" placeholder="بحث..."><i class="fas fa-search"></i></div>
+    </div>
+    <div class="glass-bar logos-bar">
+        <img src="1-images/اقرأ.png" alt="لوجو المبادرة" class="logo-mubadara">
+        <img src="1-images/2.png" alt="لوجو الوزارة">
+        <img src="1-images/1.png" alt="لوجو المشروع">
+        <img src="1-images/LOGO.png" alt="لوجو الرابع" class="logo-4">
+    </div>
+</div>
+
+<h1 class="main-title">لوحة الحروف التفاعلية</h1>
+
+<div class="progress-container">
+    <p id="progress-text">لقد تعلمت <span class="highlight-num">0</span> حروف من <span class="highlight-num">28</span></p>
+    <div class="progress-wrapper"><div id="progress-bar"></div></div>
+</div>
+
+<div class="content-wrapper">
+    <svg id="connection-line"><line id="line-element" x1="0" y1="0" x2="0" y2="0" style="display: none;" /></svg>
+    <div class="video-display-area" id="videoArea">
+        <i class="fas fa-times-circle close-video" onclick="closeVideo()"></i>
+        <div class="visual-container">
+            <h2 id="current-letter-title">اسم الحرف</h2>
+        </div>
+        <img id="letter-image" src="" class="visual-icon" alt="صورة">
+        <p id="letter-desc" style="margin: 5px 0; color: #666; font-size: 1.1rem; font-weight: bold;"></p>
+        <div id="daily-sentence" class="daily-sentence"></div>
+        <div class="video-container"><video id="videoPlayer" controls></video></div>
+        <div class="mini-quiz">
+            <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: #174572;">  أين الكلمة الصحيحة؟</p>
+            <div id="quiz-options"></div>
+        </div>
+    </div>
+    <div class="alphabet-grid" id="grid"></div>
+</div>
+
+<script>
+
+
+    const letters = ["أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
+    let currentStep = 0;
+    let currentLetterAudio = "";
+    let isLastLetterSolved = false; 
+
+    const alphabetData = {
+        "أ": { video: "2-videos/أ.mp4", info: "ألف", image: "1-images/11.png", audio: "1-sounds/alif.mp3", sentence: "أقرأُ لأعرفَ حقوقي", correct: "أسد" },
+        "ب": { video: "2-videos/ب.mp4", info: "باء", image: "1-images/22.png", audio: "1-sounds/ba.mp3", sentence: "بــالعملِ يزدادُ الرزقُ", correct: "بطة" },
+        "ت": { video: "2-videos/ت.mp4", info: "تاء", image: "1-images/33.png", audio: "1-sounds/ta.mp3", sentence: "تــعلمُ العلمِ نورٌ", correct: "تفاح" },
+        "ث": { video: "2-videos/ث.mp4", info: "ثاء", image: "1-images/444.jpg", audio: "1-sounds/tha.mp3", sentence: "ثــقتي بنفسي كبيرة", correct: "ثعلب" },
+        "ج": { video: "2-videos/ج.mp4", info: "جيم", image: "1-images/55.jpg", audio: "1-sounds/ja.mp3", sentence: "جــهدي يحققُ هدفي", correct: "جمل" },
+        "ح": { video: "2-videos/ح.mp4", info: "حاء", image: "1-images/66.png", audio: "1-sounds/ha.mp3", sentence: "حــرفةٌ في اليدِ أمانٌ", correct: "حصان" },
+        "خ": { video: "2-videos/خ.mp4", info: "خاء", image: "1-images/77.jpg", audio: "1-sounds/kha.mp3", sentence: "خــيرُ الناسِ أنفعُهم", correct: "خروف" },
+        "د": { video: "2-videos/د.mp4", info: "دال", image: "1-images/88.png", audio: "1-sounds/da.mp3", sentence: "دستورنا يحفظُ كرامتنا", correct: "دجاجة" },
+        "ذ": { video: "2-videos/ذ.mp4", info: "ذال", image: "1-images/99.jpg", audio: "1-sounds/dha.mp3", sentence: "ذكاءُ الإنسانِ في صبرِه", correct: "ذئب" },
+        "ر": { video: "2-videos/ر.mp4", info: "راء", image: "1-images/1010.jpg", audio: "1-sounds/ra.mp3", sentence: "ربي زدني علماً", correct: "رمان" },
+        "ز": { video: "2-videos/ز.mp4", info: "زاي", image: "1-images/1111.jpg", audio: "1-sounds/za.mp3", sentence: "زرعنا الخيرَ لنحصدَه", correct: "زرافة" },
+        "س": { video: "2-videos/س.mp4", info: "سين", image: "1-images/1212.gif", audio: "1-sounds/sa.mp3", sentence: "ســأكتبُ اسمي بيدي", correct: "سمكة" },
+        "ش": { video: "2-videos/ش.mp4", info: "شين", image: "1-images/1313.jpg", audio: "1-sounds/sha.mp3", sentence: "شــرفُ الإنسانِ صِدقِه", correct: "شمس" },
+        "ص": { video: "2-videos/ص.mp4", info: "صاد", image: "1-images/1414.gif", audio: "1-sounds/saad.mp3", sentence: "صــحتي هي ثروتي", correct: "صقر" },
+        "ض": { video: "2-videos/ض.mp4", info: "ضاد", image: "1-images/1515.jpg", audio: "1-sounds/daad.mp3", sentence: "ضــمانُ الحقوقِ واجبٌ", correct: "ضفدع" },
+        "ط": { video: "2-videos/ط.mp4", info: "طاء", image: "1-images/1616.png", audio: "1-sounds/taad.mp3", sentence: "طــموحي لا يحدُّه عُمر", correct: "طائرة" },
+        "ظ": { video: "2-videos/ظ.mp4", info: "ظاء", image: "1-images/1717.jpg", audio: "1-sounds/zaad.mp3", sentence: "ظــلمُ النفسِ بالجهلِ", correct: "ظرف" },
+        "ع": { video: "2-videos/ع.mp4", info: "عين", image: "1-images/1818.gif", audio: "1-sounds/ain.mp3", sentence: "عــقلي ينيرُ طريقي", correct: "عين" },
+        "غ": { video: "2-videos/غ.mp4", info: "غين", image: "1-images/1919.jpg", audio: "1-sounds/ghain.mp3", sentence: "غــدٌ أفضلُ بالتعليم", correct: "غزال" },
+        "ف": { video: "2-videos/ف.mp4", info: "ف", image: "1-images/20.png", audio: "1-sounds/fa.mp3", sentence: "فــهمُ السؤالِ نصفُ الإجابة", correct: "فيل" },
+        "ق": { video: "2-videos/ق.mp4", info: "ق", image: "1-images/21.jpg", audio: "1-sounds/qa.mp3", sentence: "قــوةُ الكلمةِ في الحق", correct: "قلم" },
+        "ك": { video: "2-videos/ك.mp4", info: "كاف", image: "1-images/222.jpg", audio: "1-sounds/ka.mp3", sentence: "كــتابي رفيقي الدائم", correct: "كتاب" },
+        "ل": { video: "2-videos/ل.mp4", info: "لام", image: "1-images/223.jpg", audio: "1-sounds/la.mp3", sentence: "لــغتي العربيةُ هويتي", correct: "ليمون" },
+        "م": { video: "2-videos/م.mp4", info: "ميم", image: "1-images/224.png", audio: "1-sounds/ma.mp3", sentence: "مــهنتي سرُّ نجاحي", correct: "موز" },
+        "ن": { video: "2-videos/ن.mp4", info: "نون", image: "1-images/225.png", audio: "1-sounds/na.mp3", sentence: "نــورُ العلمِ يطردُ الظلام", correct: "نحلة" },
+        "ه": { video: "2-videos/ه.mp4", info: "هاء", image: "1-images/226.png", audio: "1-sounds/ha_2.mp3", sentence: "هــمتي عاليةٌ دائماً", correct: "هلال" },
+        "و": { video: "2-videos/و.mp4", info: "واو", image: "1-images/227.jpg", audio: "1-sounds/wa.mp3", sentence: "وطني أمانةٌ في عنقي", correct: "ولد" },
+        "ي": { video: "2-videos/ي.mp4", info: "ياء", image: "1-images/228.jpg", audio: "1-sounds/ya.mp3", sentence: "يــومٌ جديدٌ وفرصةٌ جديدة", correct: "يمامة" },
+    };
+
+    const allWords = Object.values(alphabetData).map(d => d.correct);
+
+    const grid = document.getElementById('grid');
+    const videoArea = document.getElementById('videoArea');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const lineElement = document.getElementById('line-element');
+
+    letters.forEach((letter, index) => {
+        const card = document.createElement('div');
+        card.className = 'letter-card';
+        card.innerText = letter;
+        card.onclick = () => {
+            if (index === currentStep) {
+                card.classList.add('revealed');
+                showVideo(letter, index);
+                currentStep++;
+                updateProgress();
+            } else if (index < currentStep) {
+                showVideo(letter, index);
+            } else {
+                const nextCard = document.querySelectorAll('.letter-card')[currentStep];
+                if (nextCard) {
+                    nextCard.classList.add('next-step-hint');
+                    setTimeout(() => nextCard.classList.remove('next-step-hint'), 500);
+                }
+            }
+        };
+        grid.appendChild(card);
+    });
+
+    function showVideo(letter, index) {
+        videoArea.style.display = 'block';
+        const data = alphabetData[letter] || { video: "", info: letter, image: "", sentence: "جملة مفيدة قريباً", correct: letter };
+        
+        document.getElementById('current-letter-title').innerText = "حرف " + data.info;
+        document.getElementById('letter-image').src = data.image;
+        document.getElementById('daily-sentence').innerText = `جملة الحرف: ${data.sentence}`;
+        currentLetterAudio = data.audio;
+        
+        videoPlayer.src = data.video;
+        videoPlayer.load(); 
+
+        const quizContainer = document.getElementById('quiz-options');
+        quizContainer.innerHTML = "";
+        
+        let distractors = allWords.filter(w => w !== data.correct).sort(() => 0.5 - Math.random()).slice(0, 2);
+        const options = [data.correct, ...distractors].sort(() => 0.5 - Math.random());
+
+        options.forEach(word => {
+            const span = document.createElement('span');
+            span.className = 'quiz-option';
+            span.innerHTML = `<i class="fas fa-question-circle" style="margin-left:8px; color:#52BBFF;"></i> ${word}`;
+            
+            span.onclick = () => {
+                if(word === data.correct) {
+                    span.classList.add('correct-answer');
+                    span.innerHTML = `<i class="fas fa-check-circle"></i> أحسنت!`;
+                    new Audio('1-sounds/correct.mp3').play().catch(()=>{});
+                    
+                    if(letter === "ي") {
+                         isLastLetterSolved = true;
+                    }
+                } else {
+                    span.classList.add('wrong-answer');
+                    span.innerHTML = `<i class="fas fa-times-circle"></i> حاول ثانية`;
+                    new Audio('1-sounds/wrong.mp3').play().catch(()=>{});
+                    setTimeout(() => {
+                        span.classList.remove('wrong-answer');
+                        span.innerHTML = `<i class="fas fa-question-circle" style="margin-left:8px; color:#52BBFF;"></i> ${word}`;
+                    }, 800);
+                }
+            };
+            quizContainer.appendChild(span);
+        });
+
+        positionPopup(index);
+        const activeCard = document.querySelectorAll('.letter-card')[index];
+        setTimeout(() => drawLine(activeCard, videoArea), 100);
+    }
+
+    function positionPopup(index) {
+        const col = index % 6;
+        if (col < 3) { videoArea.style.right = "-360px"; videoArea.style.left = "auto"; }
+        else { videoArea.style.left = "-360px"; videoArea.style.right = "auto"; }
+        const row = Math.floor(index / 6);
+        videoArea.style.top = (row * 100 - (index >= 18 ? 40 : 0)) + "px";
+    }
+
+    function drawLine(startEl, endEl) {
+        setTimeout(() => {
+            const wrapper = document.querySelector('.content-wrapper').getBoundingClientRect();
+            const start = startEl.getBoundingClientRect();
+            const end = endEl.getBoundingClientRect();
+            
+            let x1, y1, x2, y2;
+            y1 = (start.top + start.height / 2) - wrapper.top;
+            y2 = (end.top + end.height / 2) - wrapper.top;
+
+            if (end.left > start.right) { 
+                x1 = start.right - wrapper.left;
+                x2 = end.left - wrapper.left;
+            } else { 
+                x1 = start.left - wrapper.left;
+                x2 = end.right - wrapper.left;
+            }
+
+            lineElement.setAttribute('x1', x1);
+            lineElement.setAttribute('y1', y1);
+            lineElement.setAttribute('x2', x2);
+            lineElement.setAttribute('y2', y2);
+            lineElement.style.display = "block";
+        }, 60); 
+    }
+
+    function closeVideo() {
+        videoArea.style.display = 'none';
+        videoPlayer.pause();
+        lineElement.style.display = "none";
+
+        if (isLastLetterSolved) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                startCelebration();
+                isLastLetterSolved = false; 
+            }, 600);
+        }
+    }
+
+    function startCelebration() {
+        new Audio('1-sounds/success.mp3').play().catch(()=>{});
+        document.getElementById('finish-screen').style.display = 'flex';
+        
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) { return clearInterval(interval); }
+            var particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    function goToNextLevel() {
+        window.location.href = "next_page.html"; 
+    }
+
+    function playLetterSound() { if(currentLetterAudio) new Audio(currentLetterAudio).play(); }
+    
+    function updateProgress() {
+        const percent = (currentStep / 28) * 100;
+        document.getElementById('progress-bar').style.width = percent + "%";
+        document.getElementById('progress-text').innerHTML = `لقد تعلمت <span class="highlight-num">${currentStep}</span> حروف من <span class="highlight-num">28</span>`;
+    }
+
+
+function changeFontSize(size) { 
+    // نحدد إن التكبير يبدأ من فوق ومن اليمين (عشان إحنا عربي)
+    document.body.style.zoom = size; 
+    
+    if (size > 1) {
+        // بنخلي الـ body يتمدد فعلياً عشان السكرول يغطي اليمين والشمال
+        document.body.style.width = (size * 100) + "%";
+        document.body.style.position = "relative";
+        document.documentElement.style.overflowX = 'auto';
+    } else {
+        document.body.style.width = "100%";
+        document.documentElement.style.overflowX = 'hidden';
+    }
+}
+</script>
+</body>
+</html>

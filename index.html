@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title> برومو المشروع</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {
+            font-family: 'Cairo', sans-serif;
+            text-align: center; direction: rtl;
+            margin: 0 auto;
+            min-width: 1200px;
+            overflow-x: auto;
+        }
+        .bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        @font-face {
+            font-family: 'ZawyaPro';
+            src: url('fonts/ZawyaPro-Bold.ttf') format('truetype');
+            font-weight: bold;
+        }
+
+        #enterBtn {
+            font-family: 'ZawyaPro', 'Cairo', sans-serif;
+            position: absolute;
+            top: 56%;
+            left: 50%;
+            transform: translate(-50%, -50%) skewX(-20deg);
+            padding: 10px 40px;
+            font-size: 2vw;
+            font-weight: bold;
+            width: 18vw; 
+            height: 5vw;
+            background: linear-gradient(45deg, #354E89, #75B8E6);
+            color: rgb(241, 239, 239);
+            border: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeInButton 1s ease-in forwards;
+            animation-delay: 2s;
+        }
+
+        @keyframes fadeInButton {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%) skewX(-20deg);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) skewX(-20deg);
+            }
+        }
+
+        #enterBtn::before {
+            content: '';
+            position: absolute;
+            width: 500%;
+            height: 500%;
+            background: conic-gradient(transparent, transparent, transparent, #ffffff);
+            animation: rotateBorder 3s linear infinite;
+            z-index: 1;
+        }
+
+        #enterBtn::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: linear-gradient(45deg, #354E89, #75B8E6);
+            z-index: 2;
+        }
+
+        #enterBtn span {
+            display: inline-block;
+            transform: skewX(20deg);
+            position: relative;
+            z-index: 3;
+            color: #f1f0f0;
+            white-space: nowrap;
+        }
+
+        @keyframes rotateBorder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #enterBtn:hover {
+            transform: translate(-50%, -55%) skewX(-20deg);
+            background: linear-gradient(45deg, #75B8E6, #354E89);
+            box-shadow: 0 0 35px rgba(255, 255, 255, 0.7);
+        }
+
+        #enterBtn:hover::after {
+            background: linear-gradient(45deg, #75B8E6, #354E89);
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- الفيديو الأول (شاشة البداية) -->
+<div id="intro">
+    <video autoplay muted playsinline class="bg-video">
+        <source src="2-videos/1.mp4" type="video/mp4">
+    </video>
+    <button id="enterBtn"> <span> الدخول للموقع </span></button>
+</div>
+
+<!-- المحتوى الأساسي (الفيديو الثاني) -->
+<div id="mainContent" style="display: none;">
+    <video playsinline class="bg-video" id="mainVideo">
+        <source src="2-videos/bromo.mp4" type="video/mp4">
+    </video>
+
+</div>
+
+<script>
+    document.getElementById("enterBtn").addEventListener("click", function() {
+        // 1. إخفاء البداية وإظهار الفيديو الثاني
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+
+        const video2 = document.getElementById("mainVideo");
+
+        // 2. تشغيل الفيديو الثاني
+        // ملاحظة: المتصفحات قد تمنع التشغيل التلقائي إذا لم يكن هناك تفاعل سابق
+        // بما أن المستخدم ضغط زر الدخول، الفيديو سيعمل بنجاح
+        video2.play().catch(function(error) {
+            console.log("خطأ في تشغيل الفيديو:", error);
+        });
+
+        // 3. عند انتهاء الفيديو الثاني، الانتقال للصفحة الثانية
+        video2.onended = function() {
+            window.location.href = "2 page.html"; 
+        };
+    });
+</script>
+
+</body>
+</html>

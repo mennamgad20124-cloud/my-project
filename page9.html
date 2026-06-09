@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>الأمية الرقمية 3 للعاديين</title>
+    <style>
+        /* --- الأساسيات --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f0f0f0;
+            direction: rtl;
+            min-height: 100vh;
+            overflow-y: auto; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-top: 130px;
+            counter-reset: step-counter;
+        }
+
+ .image-1 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- نظام الأشرطة المنفصلة --- */
+        .top-bars-container {
+            position: absolute; 
+            top: 25px;
+            width: 100%;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .glass-bar {
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(5px);
+            height: 85px; 
+            min-width: 350px;
+            padding: 0 25px;
+            border-radius: 60px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            border: 2px solid #2C4E80;
+        }
+
+        .logos-bar img { height: 50px; width: auto; object-fit: contain; }
+        .logo-mubadara, .logo-4 { height: 65px !important; width: auto; }
+
+        .tools-bar { gap: 15px; }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f0f2f5;
+            border-radius: 25px;
+            padding: 5px 15px;
+        }
+        .search-box input {
+            border: none; outline: none;
+            font-family: 'Cairo'; font-size: 14px;
+            width: 100px; background: transparent;
+        }
+        .search-box i { color: #2C4E80; }
+
+        .accessibility-tools { display: flex; gap: 10px; align-items: center; }
+
+        .size-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%; border: none;
+            background: #2C4E80; color: #ffffff;
+            cursor: pointer; font-weight: bold;
+            font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+    
+
+  .container {
+    background-color: #ffffff;
+    border-radius: 30px;
+    box-shadow: 0 10px 20px #74bacd;
+    padding: 30px;
+    max-width: 1000px;
+    width: 90%;              /* جعل العرض مرناً */
+    margin: 20px auto;       /* هام جداً لضمان التوسيط التلقائي */
+    text-align: center;
+}
+        h1::before {
+            content: counter(step-counter) "- "; 
+        }
+        h1 {
+            counter-increment: step-counter; 
+            color: #3362a9;
+            font-size: 30px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            
+        }
+        p.subtitle, li.subtitle {
+            color: #000000;
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        li.subtitle {
+            text-align: right; 
+    position: relative;        }
+        
+        /* قسم التعرف على المايك لكبار السن */
+        .apps-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-apps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .app-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .app-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .app-card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .app-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 28px;
+            color: #444;
+        }
+        .click-hint {
+            font-size: 20px;
+            color: #007bff;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* قسم المايك والتفاعل */
+        .mic-section {
+            margin: 40px 0;
+        }
+        .mic-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        .mic-btn:hover {
+            transform: scale(1.05);
+        }
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #28a745;
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); }
+            100% { transform: scale(1); }
+        }
+        .status-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 15px;
+        }
+        .output-box {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2b2b2b;
+            min-height: 60px;
+            margin-top: 20px;
+            border-left: 5px solid #007bff;
+        }
+
+        /* ستايل النافذة المنبثقة لعرض المايك الحقيقي */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 25px;
+            max-width: 800px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+.modal-content h3 {
+    margin-top: 0;
+    color: #1D476E;
+    font-size: 34px;
+    font-weight: 800;
+    background-color: #ffffff;
+    padding: 15px 35px;
+    border: 3px solid #1D476E; /* إطار سميك ومحدد */
+    border-radius: 16px;
+    display: inline-block;
+    margin-bottom: 30px;
+    
+    /* الخدعة الكرييتف: ظل حاد ومصمت يعطي تأثير ثلاثي الأبعاد هندسي شيك */
+    box-shadow: 8px 8px 0px #74bacd; 
+    
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.modal-mic-img {
+            width: 100% !important;        
+            max-width: 100% !important;    
+            max-height: 400px !important;   
+            height: auto !important;       
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .close-modal-btn {
+            background: linear-gradient(135deg, #1D476E 0%, #1D476E 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(11, 94, 215, 0.3);
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+        .close-modal-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(11, 94, 215, 0.4);
+        }
+
+        /* 🌟 الـ CSS المطور والمصلح بالكامل للبطاقات التفاعلية لقتل الملل 🌟 */
+        #modalDesc {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;              
+            margin-top: 15px;
+            text-align: right;                 
+        }
+
+        mark {
+            background-color: #fef08a;
+            border-radius: 4px;
+        }
+
+        .highlight-green {
+            background-color: #d9fdd3;
+            color: #1b5e20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ستايل البطاقة العامة */
+        .desc-card {
+            background-color: #fdfdfd;
+            border: 3px solid #e0e6ed;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            cursor: default;
+        }
+        .desc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(11, 94, 215, 0.08);
+            background-color: #f8fafc;
+        }
+
+        /* الأيقونة الصغيرة لكل بطاقة */
+        .desc-card-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        /* كلاسات الألوان المخصصة لكل بطاقة */
+        .desc-card.appearence .desc-card-icon {
+            background-color: #e0f2fe; 
+            color: #0c4a6e;
+            border: 2px solid #bae6fd;
+        }
+        .desc-card.step1 .desc-card-icon {
+            background-color: #ffe4e6; 
+            color: #881337;
+            border: 2px solid #fecdd3;
+        }
+        .desc-card.step2 .desc-card-icon {
+            background-color: #fef9c3; 
+            color: #854d0e;
+            border: 2px solid #fef08a;
+        }
+
+        .desc-card-content {
+            flex: 1;
+            text-align: right;
+        }
+        .desc-card-title {
+            font-size: 24px;
+            color: #0b5ed7;
+            font-weight: bold;
+            margin-bottom: 5px;
+            
+        }
+        .desc-card-text {
+            font-size: 22px !important;        
+            color: #2d3748 !important;
+            font-weight: bold !important;
+            margin: 0;
+            line-height: 1.6;
+        }
+    /* ستايل السهم المتحرك والنطاط */
+.guiding-arrow {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 42px;
+    color: #dc3545;
+    display: none; /* يتحكم به الجافا سكريبت */
+    animation: bounceArrow 0.6s infinite alternate;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+@keyframes bounceArrow {
+    from { top: -45px; }
+    to { top: -58px; }
+}
+
+/* مسافة علوية إضافية لشبكة الكروت لمنع تداخل الأسهم */
+.grid-apps {
+    margin-top: 45px !important;
+}
+
+/* جعل الكارت أبًا للسهم لضبط موضعه فوقه */
+.app-card {
+    position: relative !important;
+}
+
+/* مؤشر الإغلاق يظهر على يمين الزرار مباشرة ويتحرك أفقياً */
+.modal-close-pointer {
+    font-size: 45px;
+    position: absolute;
+    top: 50%;                    /* لتوسيط اليد عمودياً مع الزرار */
+    transform: translateY(-50%); /* ضبط التوسيط العمودي بدقة */
+    right: -55px;                /* دفع اليد خارج حدود الزرار جهة اليمين تماماً */
+    display: block;
+    animation: pointToButtonLeft 0.5s infinite alternate;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 20;
+    cursor: pointer;
+}
+
+/* أنيميشن ارتداد أفقي (من اليمين إلى اليسار باتجاه الزر) */
+@keyframes pointToButtonLeft {
+    from { 
+        transform: translateY(-50%) translateX(0); 
+    }
+    to { 
+        transform: translateY(-50%) translateX(-12px); /* تتحرك لليسار لتقترب من الزرار */
+    }
+}
+/* هذا الكود يجعل أي صورة داخل المودال متناسقة وغير عملاقة */
+.modal-content img {
+    max-width: 700px;       /* الصورة لن تتجاوز عرض النافذة */
+    max-height: 280px;     /* تحديد ارتفاع أقصى للصورة لتصغيرها */
+    object-fit: cover;   /* الحفاظ على أبعاد الصورة دون تشويه */
+    margin-bottom: 15px;
+    border-radius: 15px;
+}
+
+/* أزرار المحاكاة بشكل كبير ومريح لكبار السن */
+.sim-btn {
+    display: block;
+    width: 100%;
+    padding: 22px 15px !important; /* مساحة كبيرة للضغط */
+    font-size: 26px !important;    /* خط كبير جداً وواضح */
+    font-weight: 700;
+    border-radius: 18px !important; /* زوايا دائرية مريحة للعين */
+    border: 3px solid #1D476E;      /* إطار سميك لتحديد الزر */
+    background: #ffffff;
+    cursor: pointer;
+    margin: 12px 0;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+    color: #1D476E;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.sim-btn:hover {
+    background: #32ca56;
+    color: white;
+    transform: translateY(-2px);
+}
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 5px; /* تقليل الفراغ بين الأزرار */
+    max-width: 800px; /* تحديد عرض أقصى للوحة */
+    margin: 0 auto 15px auto;
+}
+/* هذا التعديل يجعل حقل المبلغ كبيراً جداً وواضحاً */
+#amt {
+    width: 100% !important;
+    padding: 20px !important;       /* مساحة داخلية واسعة */
+    font-size: 40px !important;     /* تكبير الخط جداً */
+    height: 80px !important;        /* زيادة ارتفاع الحقل */
+    border: 3px solid #1D476E !important; 
+    border-radius: 15px !important;
+    text-align: center;             /* توسيط الرقم */
+    font-family: 'Cairo', sans-serif;
+    margin-top: 15px;
+}
+#phone-display {
+    background: #ffffff; 
+    padding: 25px !important;      /* مساحة داخلية كبيرة */
+    font-size: 48px !important;    /* حجم خط ضخم جداً */
+    font-weight: 800;              /* خط عريض */
+    color: #1D476E;                /* لون غامق للوضوح */
+    margin-bottom: 25px !important;
+    border-radius: 20px;
+    border: 4px solid #1D476E !important; /* إطار سميك */
+    text-align: center;            /* التوسيط */
+    direction: ltr;                /* لضمان الترتيب الصحيح للأرقام */
+    min-height: 90px;              /* تحديد ارتفاع أدنى ليكون الحقل كبيراً */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); /* تأثير حفر الحقل */
+}
+
+/* كلاس خاص ببطاقات الخطوة الثانية فقط لتكون أكبر */
+.step-two-card {
+    width: 280px !important;    /* عرض أكبر للبطاقة */
+    padding: 40px !important;   /* مساحة ضغط مريحة */
+    border-radius: 25px !important;
+}
+
+.sim-input {
+    width: 100% !important;
+    padding: 15px !important;
+    margin: 10px 0;
+    font-size: 22px !important;
+    border: 3px solid #1D476E !important;
+    border-radius: 12px !important;
+    font-family: 'Cairo', sans-serif;
+    display: block;
+}
+
+        /* الشاشة الخضراء النهائية */
+        #finish-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 204, 113, 0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        #finish-screen h2 { font-size: 5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        #finish-screen p { font-size: 2rem; margin-bottom: 40px; }
+        .nav-btn {
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; background: white;
+            color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .nav-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+
+   </style>
+</head>
+<body>
+
+    <div class="image-1"><img src="1-images/number/b4.jpg" alt="خلفية"></div>
+
+<div id="finish-screen">
+    <i class="fas fa-check-circle" style="font-size: 8rem; margin-bottom: 20px;"></i>
+    <h2>أحسنت!</h2>
+    <p>لقد أتممت تعلم جميع الحروف بنجاح</p>
+    
+    <a href="2 page.html" style="text-decoration: none;">
+        <button class="nav-btn">الانتقال للمستوى التالي <i class="fas fa-arrow-left"></i></button>
+    </a>
+</div>
+    <div class="top-bars-container">
+        <div class="glass-bar tools-bar">
+            <div class="accessibility-tools">
+                <button class="size-btn" onclick="changeFontSize(1.3)">A+</button>
+                <button class="size-btn" onclick="changeFontSize(1.0)">A</button>
+                <button class="size-btn" onclick="changeFontSize(0.8)">A-</button>
+            </div>
+            <div class="search-box"><input type="text" placeholder="بحث..."><i class="fas fa-search"></i></div>
+        </div>
+        <div class="glass-bar logos-bar">
+            <img src="1-images/اقرأ.png" alt="لوجو المبادرة" class="logo-mubadara">
+            <img src="1-images/2.png" alt="لوجو الوزارة">
+            <img src="1-images/1.png" alt="لوجو المشروع">
+            <img src="1-images/LOGO.png" alt="لوجو الرابع" class="logo-4">
+        </div>
+    </div>
+
+                
+
+<div class="container">
+<h1>الخطوة الأولى: الفهم والتعرف (التعليم البصري الواقعي)</h1>
+<ul style="padding-right: 60px;"> <li class="subtitle">اضغط على أي بطاقة لتشاهد <mark>"صورة هاتف واقعية ومكبرة"</mark> توضح لك بالضبط أين يقع زر المايك داخل كل تطبيق:-</li> </ul>   
+    <div class="apps-section">
+        <h2 style="font-size: 30px;color: #417cd4;font-weight: bold;"> اضغط على التطبيق لرؤية شكل المايك الحقيقي🎙️ </h2>
+        <div class="grid-apps">
+<div class="app-card" onclick="showNext('wallet', 'المحفظة الإلكترونية', '')">  
+  <div class="guiding-arrow" id="arrow-wallet" style="display: block;">👇</div>
+        <i class="fas fa-wallet" style="font-size: 50px; color: #28a745; margin-bottom: 10px;"></i>
+    <p style="font-size: 22px; font-weight: bold;">المحفظة الإلكترونية</p>
+    <span class="click-hint">اضغط هنا 🔍</span>
+</div>
+
+             <div class="app-card" onclick="showNext('digital_egypt', 'بوابة مصر الرقمية', '', '')">
+<div class="guiding-arrow" id="arrow-digital" style="display: none;">👇</div>
+                <i class="fas fa-id-card" style="font-size: 50px; color: #17a2b8; margin-bottom: 10px;"></i>
+    <p style="font-size: 22px; font-weight: bold;">بوابة مصر الرقمية</p>
+    <span class="click-hint">اضغط هنا 🔍</span>
+</div>
+         <div class="app-card" onclick="showNext('security', 'الأمان الرقمي', '', '')">
+<div class="guiding-arrow" id="arrow-security" style="display: none;">👇</div>
+            <i class="fas fa-shield-alt" style="font-size: 50px; color: #dc3545; margin-bottom: 10px;"></i>
+    <p style="font-size: 22px; font-weight: bold;  ">الأمان الرقمي (الخط الأحمر)</p>
+    <span class="click-hint">اضغط هنا 🔍</span>
+</div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="container">
+<h1>الخطوة الثانية: التجربة والممارسة (المحاكاة الآمنة)</h1>
+<ul style="padding-right: 60px;"> <li class="subtitle">اضغط على أي تطبيق لتبدأ <mark>"تدريباً عملياً ومحاكاة"</mark> تساعدك على تنفيذ المهام بثقة وبدون أخطاء:-</li> </ul> 
+<div class="apps-section">
+<h2 style="font-size: 30px;color: #417cd4;font-weight: bold;"> اضغط على التطبيق لبدء التدريب التفاعلي 🎯 </h2>
+ <div class="grid-apps">
+<div class="app-card step-two-card" onclick="showNext('wallet', 'المحفظة الإلكترونية', 'simulate', 'step2')">
+    <div class="guiding-arrow" id="arrow-wallet-2" style="display: block;">👇</div> 
+    <i class="fas fa-wallet" style="font-size: 50px; color: #28a745; margin-bottom: 10px;"></i>
+ <p style="font-size: 22px; font-weight: bold;">المحفظة الإلكترونية</p>
+ <span class="click-hint">ابدأ التدريب 🔍</span>
+</div>
+
+<div class="app-card step-two-card" onclick="showNext('digital_egypt', 'بوابة مصر الرقمية', 'simulate', 'step2')">
+    <div class="guiding-arrow" id="arrow-digital-2" style="display: none;">👇</div>
+     <i class="fas fa-id-card" style="font-size: 50px; color: #17a2b8; margin-bottom: 10px;"></i>
+ <p style="font-size: 22px; font-weight: bold;">بوابة مصر الرقمية</p>
+ <span class="click-hint">ابدأ التدريب 🔍</span>
+</div>
+
+    </div>
+</div>
+<br>
+
+
+
+
+
+<div class="modal-overlay" id="micModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">شكل المايك</h3>
+        <img src="" alt="شكل المايك" class="modal-mic-img" id="modalImg">
+        <div id="modalDesc"></div> 
+        <button class="close-modal-btn" onclick="closeModal()">فهمت، إغلاق</button>
+    </div>
+</div>
+   <script>
+    // الدوال الأساسية القديمة
+    function changeFontSize(scale) { document.body.style.zoom = scale; }
+    function toggleChat() {
+        const chat = document.getElementById('chatBox');
+        chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+    }
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (text !== "") {
+            addMessage(text, 'user-msg');
+            input.value = "";
+            generateBotResponse(text);
+        }
+    }
+    function addMessage(text, className) {
+        const chatMessages = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${className}`;
+        msgDiv.innerText = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function generateBotResponse(userText) {
+        let response = "أنا هنا لمساعدتك في تعلم القراءة والكتابة!";
+        if (userText.includes("موقع")) response = "هذا موقع مبادرة تعليم الكبار.";
+        setTimeout(() => addMessage(response, 'bot-msg'), 600);
+    }
+    function startVoice() {
+        const voiceBtn = document.getElementById('voiceBtn');
+        const userInput = document.getElementById('userInput');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("Chrome required");
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ar-EG';
+        recognition.onstart = () => voiceBtn.classList.add('recording');
+        recognition.onresult = (event) => userInput.value = event.results[0][0].transcript;
+        recognition.onend = () => { voiceBtn.classList.remove('recording'); if(userInput.value) sendMessage(); };
+        recognition.start();
+    }
+
+    // المتغيرات الأساسية
+    let currentApp = '';
+    let currentService = ""; 
+    let enteredNumber = "";
+    let selectedBill = "";
+
+    // الدالة الموحدة والمصلحة (لا تحذفي أي دالة أخرى)
+    function showNext(app, appName, mode) {
+        currentApp = app;
+      
+        document.getElementById('modalTitle').innerText = appName;
+        document.getElementById('modalImg').style.display = 'none';
+        
+        if (mode === 'simulate') {
+            renderStep1();
+        } else {
+            // استدعاء دالة المعلومات القديمة مع إرسال وسيط 'info' لتجاوز شرط الخطأ
+            showMic(app, appName, '', ''); 
+        }
+        document.getElementById('micModal').classList.add('active');
+    }
+
+    // دالتك الأصلية لعرض المعلومات (تم إصلاح شرط if فيها)
+    function showMic(app, appName, appLogoUrl, micImgUrl) {
+        document.getElementById('modalTitle').innerText = appName;
+        const modalImg = document.getElementById('modalImg');
+        
+        // تم إصلاح شرط mode المفقود هنا
+        modalImg.style.display = (micImgUrl === '') ? 'none' : 'block';
+        if (micImgUrl !== '') modalImg.src = micImgUrl;
+
+        let desc = '';
+        if(app === 'wallet') {
+            desc = `<img src="1-images/number/11.png" alt="جوجل"><div class="desc-card appearence"><div class="desc-card-icon">📱</div><div class="desc-card-content"><span class="desc-card-title">ما هي المحفظة؟</span><span class="desc-card-text">هي تطبيق يربط رقم موبايلك بحساب مالي، ليكون بمثابة <mark>"خزنة شخصية"</mark> في جيبك.</span></div></div><div class="desc-card step1"><div class="desc-card-icon">💸</div><div class="desc-card-content"><span class="desc-card-title">وظيفتها:</span><span class="desc-card-text">تُمكنك من إيداع وسحب الأموال، دفع الفواتير، وشحن الرصيد فتحول موبايلك لـ <mark>"خزنة"</mark> تمنع الحاجة للوقوف في طوابير مكاتب البريد أو فروع الاتصالات.</span></div></div>`;
+        } else if(app === 'digital_egypt') {
+            desc = `<img src="1-images/number/12.png" alt="جوجل" ><div class="desc-card appearence"><div class="desc-card-icon">🏛️</div><div class="desc-card-content"><span class="desc-card-title">ما هي البوابة؟</span><span class="desc-card-text">هي منصة حكومية إلكترونية (تطبيق وموقع)، تتيح لك إنهاء خدماتك الرسمية وأنت في بيتك.</span></div></div><div class="desc-card step1"><div class="desc-card-icon">📄</div><div class="desc-card-content"><span class="desc-card-title">وظيفتها:</span><span class="desc-card-text">تمكّنك من استخراج <mark>"شهادة ميلاد"</mark> أو تجديد <mark>"بطاقة التموين"</mark> أو رخصة المركبة دون طوابير فالمصلحة الحكومية أصبحت بلمسة واحدة بدلاً من الذهاب للسجل المدني.</span></div></div>`;
+        } else if(app === 'security') {
+            desc = `<img src="1-images/number/13.png" alt="جوجل" style="height:220px; width:470px; margin:0 auto 20px auto;"><div class="desc-card appearence"><div class="desc-card-icon">🚨</div><div class="desc-card-content"><span class="desc-card-title">ما هو الأمان الرقمي؟</span><span class="desc-card-text">ليس تطبيقاً، بل هو <mark>"وعي وذكاء"</mark> تطبقه أثناء استخدام أي تطبيق لتحمي نفسك من النصب.</span></div></div><div class="desc-card step1"><div class="desc-card-icon">🎁</div><div class="desc-card-content"><span class="desc-card-title">فخ رسائل الجوائز:</span><span class="desc-card-text">أي رسالة تقول لك <mark>"ألف مبروك كسبت جائزة"</mark> وتطلب الضغط على رابط، هي غالباً خدعة لسرقة بياناتك كود التحقق هو <mark>"مفتاح بيتك الرقمي"</mark>لا تعطه لأي شخص مهما ادعى أنه من البنك، فهذا هو الخط الأحمر الذي لا يجب تجاوزه أبداً. </span></div></div>`;
+        }
+        document.getElementById('modalDesc').innerHTML = desc;
+    }
+
+    function closeModal() {
+        document.getElementById('micModal').classList.remove('active');
+        document.getElementById('arrow-wallet').style.display = 'none';
+        document.getElementById('arrow-digital').style.display = 'none';
+        document.getElementById('arrow-security').style.display = 'none';
+        if (currentApp === 'wallet') document.getElementById('arrow-digital').style.display = 'block';
+        else if (currentApp === 'digital_egypt') document.getElementById('arrow-security').style.display = 'block';
+        else if (currentApp === 'security') document.getElementById('arrow-wallet').style.display = 'block';
+        currentApp = '';
+function closeModal() {
+    // 1. إغلاق النافذة
+    document.getElementById('micModal').classList.remove('active');
+    
+    // 2. منطق الخطوة الثانية (المستقل)
+    if (currentStep === 'step2') {
+        const arrow1 = document.getElementById('arrow-wallet-2');
+        const arrow2 = document.getElementById('arrow-digital-2');
+        
+        // إخفاء كل أسهم الخطوة الثانية أولاً
+        if (arrow1) arrow1.style.display = 'none';
+        if (arrow2) arrow2.style.display = 'none';
+
+        // تنقل السهم: إذا كان التطبيق المغلق هو المحفظة، أظهر سهم البوابة والعكس
+        if (currentApp === 'wallet') {
+            if (arrow2) arrow2.style.display = 'block';
+        } else if (currentApp === 'digital_egypt') {
+            if (arrow1) arrow1.style.display = 'block';
+        }
+    } 
+    // 3. منطق الخطوة الأولى (فقط إذا كان المستخدم يضغط على الخطوة الأولى)
+    else if (currentStep === 'step1') {
+        document.getElementById('arrow-wallet').style.display = 'none';
+        document.getElementById('arrow-digital').style.display = 'none';
+        document.getElementById('arrow-security').style.display = 'none';
+
+        if (currentApp === 'wallet') document.getElementById('arrow-digital').style.display = 'block';
+        else if (currentApp === 'digital_egypt') document.getElementById('arrow-security').style.display = 'block';
+        else if (currentApp === 'security') document.getElementById('arrow-wallet').style.display = 'block';
+    }
+    
+    // 4. إعادة تعيين المتغيرات (هذا السطر ضروري جداً)
+    currentApp = '';
+    currentStep = '';
+}}
+function renderStep1() {
+    if (currentApp === 'digital_egypt') {
+        document.getElementById('modalDesc').innerHTML = `
+           <div style="text-align: right; overflow-y: auto; max-height: 400px;">
+                <p style="font-size:22px; font-weight:bold; color:#17a2b8;">أكمل البيانات لاستخراج الشهادة:</p>
+                <input type="text" id="fullName" placeholder="الاسم بالكامل" class="sim-input">
+                <input type="text" id="fatherName" placeholder="اسم الأب" class="sim-input">
+                <input type="text" id="motherName" placeholder="اسم الأم" class="sim-input">
+<input type="text" id="nationalId" placeholder="الرقم القومي (14 رقم)" class="sim-input" 
+       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14);">                <input type="text" id="birthPlace" placeholder="مكان الميلاد" class="sim-input">
+                <input type="date" id="birthDate" class="sim-input">
+                <button class="sim-btn" style="background:#17a2b8; color:white; margin-top:15px;" onclick="renderStep2()">عرض الشهادة</button>
+            </div> `;
+    } else {
+        // المحتوى الأصلي للمحفظة
+        document.getElementById('modalDesc').innerHTML = `<p style="font-size:34px;color: blue;font-weight: bolder; ">اختر الخدمة المطلوبة:-</p><button class="sim-btn" onclick="setService('شحن رصيد')">شحن رصيد</button><button class="sim-btn" onclick="setService('تحويل أموال')" >تحويل أموال</button><button class="sim-btn" onclick="setService('دفع فاتورة')">دفع فاتورة</button>`;
+    }
+}    function setService(service) { currentService = service; (service === 'دفع فاتورة') ? renderBillSelection() : renderStep2(); }
+    function renderBillSelection() { document.getElementById('modalDesc').innerHTML = `<p>اختر نوع الفاتورة:</p><button class="sim-btn" onclick="selectBill('كهرباء')">كهرباء</button><button class="sim-btn" onclick="selectBill('مياه')">مياه</button><button class="sim-btn" onclick="selectBill('غاز')">غاز</button>`; }
+    function selectBill(type) { selectedBill = type; renderStep2(); }
+
+     
+  function renderStep2() {
+    if (currentApp === 'digital_egypt') {
+        // جمع البيانات
+        const name = document.getElementById('fullName').value;
+        const fName = document.getElementById('fatherName').value;
+        const mName = document.getElementById('motherName').value;
+        const nid = document.getElementById('nationalId').value;
+        const place = document.getElementById('birthPlace').value;
+        const date = document.getElementById('birthDate').value;
+
+        document.getElementById('modalDesc').innerHTML = `
+            <div style="background:#fff; border: 5px solid #17a2b8; padding:20px; text-align:center; font-family: 'Cairo';">
+                <h2 style="color:#17a2b8; border-bottom:2px solid #17a2b8;">شهادة ميلاد رقمية رسمية</h2>
+                <div style="text-align:right; font-size: 20px; line-height: 2; margin-top:15px;">
+                    <p><strong>الاسم:</strong> ${name}</p>
+                    <p><strong>اسم الأب:</strong> ${fName}</p>
+                    <p><strong>اسم الأم:</strong> ${mName}</p>
+                    <p><strong>الرقم القومي:</strong> ${nid}</p>
+                    <p><strong>مكان الميلاد:</strong> ${place}</p>
+                    <p><strong>تاريخ الميلاد:</strong> ${date}</p>
+                </div>
+                <p style="color:green; font-weight:bold; margin-top:15px;">تمت العملية بنجاح ✅</p>
+                <button class="sim-btn" onclick="closeModal()">إغلاق</button>
+            </div>
+        `;
+    } else {
+        updateScreen();
+    }
+}
+    function updateScreen() { document.getElementById('modalDesc').innerHTML = `<p style="font-size:24px; font-weight:bold; margin-bottom:10px;">${currentService === 'دفع فاتورة' ? 'أدخل كود الفاتورة:' : 'أدخل رقم الهاتف:'}</p><div id="phone-display">${enteredNumber || "010..."}</div><div class="keypad" style="display:grid; grid-template-columns: repeat(11, 1fr); gap:10px;"><button class="sim-btn" onclick="addNumber('0')">0</button><button class="sim-btn" onclick="addNumber('1')">1</button><button class="sim-btn" onclick="addNumber('2')">2</button><button class="sim-btn" onclick="addNumber('3')">3</button><button class="sim-btn" onclick="addNumber('4')">4</button><button class="sim-btn" onclick="addNumber('5')">5</button><button class="sim-btn" onclick="addNumber('6')">6</button><button class="sim-btn" onclick="addNumber('7')">7</button><button class="sim-btn" onclick="addNumber('8')">8</button><button class="sim-btn" onclick="addNumber('9')">9</button><button class="sim-btn" onclick="clearNumber()" style="background:#ffc107;">مسح</button></div><button class="sim-btn" style="width:100%; margin-top:10px;" onclick="renderAmount()">متابعة</button>`; }
+    function renderAmount() { document.getElementById('modalDesc').innerHTML = `<p style="font-size:32px; font-weight:bold;">أدخل المبلغ:</p><input type="number" id="amt" placeholder="اكتب المبلغ هنا..."><button class="sim-btn" style="width:100%; margin-top:20px; font-size:24px;" onclick="renderStep3()">متابعة</button>`; }
+    function renderStep3() { document.getElementById('modalDesc').innerHTML = `<div style="border: 2px solid #0b5ed7; padding:20px; border-radius:15px;"><p><strong>مراجعة العملية:</strong></p><p>الخدمة: ${currentService} ${selectedBill}</p><p>المبلغ: ${document.getElementById('amt')?.value || "0"} جنيه</p><button class="sim-btn" style="background:#28a745; color:white; width:100%;" onclick="showReceipt()">تأكيد</button></div>`; }
+    function addNumber(num) { if(enteredNumber.length < 11) { enteredNumber += num; updateScreen(); } }
+    function clearNumber() { enteredNumber = ""; updateScreen(); }
+    function showReceipt() { document.getElementById('modalDesc').innerHTML = `<div style="background:#fff; border: 2px solid #333; padding:20px; text-align:center;"><h2 style="border-bottom: 2px solid #333; padding-bottom:10px;">إيصال دفع رسمي</h2><p>تمت العملية بنجاح ✅</p><button class="sim-btn" style="background:#0b5ed7; color:white; width:100%;" onclick="closeModal()">إغلاق الإيصال</button></div>`; }
+function renderStep3() {
+    let amount = document.getElementById('amt') ? document.getElementById('amt').value : "50";
+    let summary = currentService === 'دفع فاتورة' ? `دفع فاتورة ${selectedBill}` : `${currentService}`;
+    
+    document.getElementById('modalDesc').innerHTML = `
+        <div style="border: 4px solid #0b5ed7; padding:30px; border-radius:25px; font-size: 26px; line-height: 2;">
+            <p><strong style="font-size:32px;">مراجعة العملية:</strong></p>
+            <p>الخدمة: <strong>${summary}</strong></p>
+            <p>المبلغ: <strong>${amount} جنيه</strong></p>
+            <p>إلى: <strong>${enteredNumber}</strong></p>
+            <button class="sim-btn" style="background:#28a745; color:white; width:100%; margin-top:20px; font-size:28px;" onclick="showReceipt()">تأكيد</button>
+            <button class="sim-btn" style="width:100%; background:#ccc; font-size:28px;" onclick="renderStep2()">رجوع</button>
+        </div>
+    `;
+}
+function showReceipt() {
+    let amount = document.getElementById('amt') ? document.getElementById('amt').value : "50";
+    let summary = currentService === 'دفع فاتورة' ? `دفع فاتورة ${selectedBill}` : `${currentService}`;
+    
+    document.getElementById('modalDesc').innerHTML = `
+        <div style="background:#fff; border: 4px solid #333; padding:40px; text-align:center; font-family: 'Cairo', sans-serif; font-size: 26px;">
+            <h2 style="border-bottom: 3px solid #333; padding-bottom:15px; font-size:40px;">إيصال دفع رسمي</h2>
+            <div style="text-align:right; margin: 30px 0;">
+                <p><strong>الخدمة:</strong> ${summary}</p>
+                <p><strong>المبلغ:</strong> ${amount} جنيه</p>
+                <p><strong>رقم المرجع:</strong> 88992211</p>
+            </div>
+            <p style="font-weight:bold; border-top: 3px solid #333; padding-top:20px; font-size:32px; color:#28a745;">تمت العملية بنجاح ✅</p>
+            <button class="sim-btn" style="background:#0b5ed7; color:white; width:100%; font-size:28px; padding:20px;" onclick="closeModal()">إغلاق الإيصال</button>
+        </div>
+    `;
+}
+function showNext(app, appName, mode, step) {
+    currentApp = app;
+    currentStep = step;
+    
+    document.getElementById('modalTitle').innerText = appName;
+    document.getElementById('modalImg').style.display = 'none';
+    document.getElementById('micModal').classList.add('active');
+
+    // إذا كانت محاكاة، نعرض محتوى تمهيدي أولاً
+    if (mode === 'simulate') {
+        if (app === 'digital_egypt') {
+            document.getElementById('modalDesc').innerHTML = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">🏛️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">مرحباً بك في بوابة مصر الرقمية</span>
+                        <p class="desc-card-text">في هذا التدريب، ستقوم باستخراج <strong>شهادة ميلاد</strong> رقمية. تابع معي الخطوات بدقة.</p>
+                    </div>
+                </div>
+                <button class="sim-btn" style="background:#0b5ed7; color:white;" onclick="renderStep1()">ابدأ التدريب الآن</button>
+            `;
+        } else {
+            renderStep1(); // للمحفظة وغيرها
+        }
+    } else {
+        showMic(app, appName, '', '');
+    }
+}
+
+// 2. دالة الاحتفال (خارج دالة handleQuizAnswer)
+    function startCelebration() {
+        // تشغيل صوت النجاح (اختياري)
+        new Audio('1-sounds/success.mp3').play().catch(()=>{});
+        
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            
+            var particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    // 3. دالة الانتقال
+    function goToNextLevel() {
+        window.location.href = "page6.html"; 
+    }
+
+</script>
+
+</body>
+</html>

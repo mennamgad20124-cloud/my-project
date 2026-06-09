@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <title>الأمية المهنية للعاديين</title>
+   
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: transparent; 
+            padding: 40px 20px;
+        }
+
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; 
+            background-image: url('1-images/number/b3.jpg');
+            
+            background-size: cover;
+            background-position: center;
+        }
+
+        h1.main-title { 
+            color: #19A8EF; 
+            font-size: 2.5rem; 
+            text-shadow: 0 2px 5px rgba(255,255,255,0.8); 
+            display: inline-block;
+            border-bottom: 3px solid #19A8EF; 
+            padding-bottom: 10px; 
+            margin-top: 20px;
+        }
+
+        .roadmap-wrapper {
+         display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* هذا سيجعل الكروت تتجه لليمين */
+    width: 100%;
+}
+
+   .progress-track {
+    display: flex;
+    justify-content: center; /* توسيط الدوائر والخط */
+    align-items: center;
+    position: relative;
+    width: 600px; /* العرض الكلي للمسار + الدوائر */
+    margin: 50px auto; /* توسيط المسار في الصفحة */
+}
+
+.horizontal-line {
+    height: 8px;
+    width: 480px; /* العرض الكلي */
+    background: #bdc3c7;
+    border-radius: 10px;
+    position: absolute;
+    z-index: 0;
+}
+
+        .horizontal-line-fill {
+  position: absolute;
+    height: 6px; /* نفس ارتفاع الخط الرمادي */
+    width: 0%;
+    background: #2ecc71;
+    top: 50px; /* نفس مكان الخط الرمادي */
+    z-index: 1;
+    transition: width 1s ease-in-out;
+    border-radius: 10px;
+    right: 50%;          /* يبدأ من منتصف المسار */
+    transform: translateX(50%); /* لضبط التمركز الدقيق */
+}
+.line-container {
+    position: absolute;
+    height: 8px;
+    width: 400px; /* عرض الخط الكلي */
+    background: #bdc3c7; /* الخط الرمادي */
+    border-radius: 10px;
+    z-index: 0;
+}
+
+#line-fill {
+    height: 8px;
+    width: 0%; /* سيتغير بالجافا سكريبت */
+    background: #2ecc71;
+    border-radius: 10px;
+    position: absolute;
+    z-index: 1;
+    transition: width 1s ease-in-out;
+    /* لجعل الخط يبدأ من اليمين إلى اليسار (لأن الاتجاه rtl) */
+    right: calc(50% - 240px); 
+}
+
+  .dot {
+    width: 30px;
+    height: 30px;
+    background: #bdc3c7;
+    border: 4px solid #dcdde1;
+    border-radius: 50%;
+    z-index: 2;
+    margin: 0 225px; /* يوزع الدوائر على أطراف الخط (480/2 = 240) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+}
+
+        .dot.completed {
+            background: #2ecc71;
+            border-color: white;
+            color: white; 
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+
+
+.levels-stack {
+    display: flex;
+    flex-direction: row;        /* الترتيب الصحيح (1، 2، 3) */
+    gap: 30px;
+    justify-content: center; /* ستبدأ الكروت من جهة اليمين */
+    width: 100%;
+}
+
+        .level-card {
+          background: rgba(255, 255, 255, 0.95);
+    border-radius: 25px;
+    text-decoration: none;
+    display: flex; 
+    flex-direction: column; /* الصورة فوق النص */
+    align-items: center;
+    padding: 15px;
+    width: 600px;           /* عرض محدد للكارت */
+    height: 620px;          /* ارتفاع مناسب للشكل الجديد */
+    transition: 0.4s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-top: 10px solid transparent; /* نقل البوردر للأعلى */
+    border-right: none;
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+        }
+
+        .completed-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            z-index: 10;
+            pointer-events: none; /* يسمح بالضغط على الكارت حتى لو الطبقة موجودة */
+        }
+
+        .level-card.finished .completed-overlay {
+            display: flex;
+        }
+
+        .level-card:hover:not(.finished) {
+            transform: scale(1.02);
+            background: white;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .lv-1 { border-right-color: #FBC445; }
+        .lv-2 { border-right-color: #47b3fb; }
+        .lv-3 { border-right-color: #2ecc71; }
+
+       .level-card img {
+    width: 100%;            /* الصورة تأخذ عرض الكارت */
+    height: 300px;
+    object-fit: cover;
+    margin-bottom: 15px;    /* مسافة تحت الصورة */
+    margin-left: 0;
+}
+
+        .card-info {
+            flex-grow: 1;
+            text-align: right;
+        }
+
+        .card-info h2 {
+            color: #174572;
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+
+        .card-info p {
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .level-icon-circle {
+            width: 60px;
+            height: 60px;
+            background: #f0f4f8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-right: 15px; 
+            color: #3d85b5;
+            transition: 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .progress-track { display: none; }
+            .level-card { flex-direction: column; text-align: center; height: auto; }
+            .level-card img { margin-left: 0; margin-bottom: 15px; width: 100%; }
+            .level-icon-circle { display: none; }
+        }
+
+
+
+.nav-btn {
+    padding: 20px 50px;      /* زيادة المساحة الداخلية ليكون الزرار عريضاً */
+    font-size: 35px;         /* حجم الخط داخل الزرار */
+    font-weight: bold;
+    background: #ffffff;     /* لون الزرار (يمكنك تغييره) */
+    color: #3d85b5;            /* لون النص */
+    border: none;
+    border-radius: 50px;     /* جعل الأطراف دائرية */
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* إضافة ظل لبروز الزرار */
+    transition: transform 0.3s ease, background 0.3s ease;
+  
+}
+
+/* تأثير عند مرور الماوس */
+.nav-btn:hover {
+    transform: scale(1.05);  /* تكبير بسيط عند التفاعل */
+    background: #27ae60;     /* تغيير اللون لدرجة أغمق قليلاً */
+    color: #ffffff;
+}
+        
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+
+    <h1 class="main-title"> رحلة المهارة: من الحرفة إلى التخطيط الذكي</h1>
+   
+<div class="roadmap-wrapper" style="flex-direction: column; align-items: center;">
+    <!-- الكروت أولاً -->
+    <div class="levels-stack">
+        <!-- الكروت الخاصة بك هنا -->
+    </div>
+
+    <!-- خط التقدم والدواير تحت الكروت -->
+ 
+
+
+        <div class="levels-stack">
+            <a href="page11.html" class="level-card lv-1" id="card-1" onclick="saveProgress(1)">
+                <div class="completed-overlay">لقد أنهيت المستوى <i class="fas fa-check-circle" style="margin-right:10px;"></i></div>
+            
+                <img src="1-images/number/27.png" alt="المستوى الأول">
+                
+          <div class="level-icon-circle"><i class="fas fa-tools"></i></div>       
+                <div class="card-info">
+                    <h2 style="font-size: 30px; font-weight: bold; text-align: center; color: #3d85b5;">المستوى الأول</h2>
+                    <p style=" font-weight: bold; text-align: center; font-size: 22px;">"دليل المهن والحرف اليدوية: يهدف هذا المستوى إلى اكتشف عالماً من المهن الحرفية واليدوية من خلال تجربة تعليمية تفاعلية ومبسطة"</p>
+                </div>
+          </a>
+
+            <a href="page12.html" class="level-card lv-2" id="card-2" onclick="saveProgress(2)">
+                <div class="completed-overlay">لقد أنهيت المستوى <i class="fas fa-check-circle" style="margin-right:10px;"></i></div>
+                <img src="1-images/number/28.png" alt="المستوى الثاني">
+                <div class="level-icon-circle"><i class="fas fa-brain"></i></div>  
+                <div class="card-info">
+                    <h2 style="font-size: 30px; font-weight: bold; text-align: center; color: #3d85b5;">المستوى الثاني</h2>
+                    <p style=" font-weight: bold; text-align: center;font-size: 22px;">"خطوات الحرفة الذكية: تحدى نفسك في ترتيب خطوات المهن المختلفة لإتقان أصول الحرف وتنمية تفكيرك المنطقي بأسلوب مشوق"</p>
+                </div>
+          </a>
+
+         
+        </div>
+    </div>
+
+<a href="2 page.html" id="next-page-btn" style="display: none; margin-top: 10px;font-size: 40px;">
+    <button class="nav-btn">الانتقال للصفحة الرئيسية</button>
+</a>
+<script>
+    // وظيفة حفظ التقدم عند الضغط على الكارت
+    function saveProgress(levelId) {
+        sessionStorage.setItem('level_' + levelId, 'visited');
+    }
+
+    window.onload = function() {
+        // نتحقق من وجود الكروت في الصفحة قبل تنفيذ الكود
+        const card1 = document.getElementById('card-1');
+        if (!card1) return; 
+
+        let allFinished = true; 
+        
+        // التحقق من المستويين فقط
+        for (let i = 1; i <= 2; i++) {
+            if (sessionStorage.getItem('level_' + i) === 'visited') {
+                const card = document.getElementById('card-' + i);
+                if (card) {
+                    card.classList.add('finished');
+                }
+            } else {
+                allFinished = false;
+            }
+        }
+
+        // إظهار زر الانتقال فقط إذا تم إنهاء المستويين
+        if (allFinished) {
+            const nextBtn = document.getElementById('next-page-btn');
+            if (nextBtn) {
+                nextBtn.style.display = 'block';
+            }
+        }
+    };
+
+
+</script>
+</body>
+</html>

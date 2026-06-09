@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأمية الرقمية 1 للعاديين</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            counter-reset: step-counter;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px #74bacd;
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center; 
+        }
+        h1::before {
+            counter-increment: step-counter; 
+            content: counter(step-counter) "- "; 
+        }
+        h1 {
+            color: #007bff;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: bolder;
+        }
+        p.subtitle, li.subtitle {
+            color: #000000;
+            font-size: 26px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        li.subtitle {
+            text-align: right;  
+        }
+        
+        /* قسم التعرف على المايك لكبار السن */
+        .apps-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-apps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .app-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .app-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .app-card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .app-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 28px;
+            color: #444;
+        }
+        .click-hint {
+            font-size: 20px;
+            color: #007bff;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* قسم المايك والتفاعل */
+        .mic-section {
+            margin: 40px 0;
+        }
+        .mic-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        .mic-btn:hover {
+            transform: scale(1.05);
+        }
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #28a745;
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); }
+            100% { transform: scale(1); }
+        }
+        .status-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 15px;
+        }
+        .output-box {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2b2b2b;
+            min-height: 60px;
+            margin-top: 20px;
+            border-left: 5px solid #007bff;
+        }
+
+        /* ستايل النافذة المنبثقة لعرض المايك الحقيقي */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 25px;
+            max-width: 800px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+.modal-content h3 {
+    margin-top: 0;
+    color: #1D476E;
+    font-size: 34px;
+    font-weight: 800;
+    background-color: #ffffff;
+    padding: 15px 35px;
+    border: 3px solid #1D476E; /* إطار سميك ومحدد */
+    border-radius: 16px;
+    display: inline-block;
+    margin-bottom: 30px;
+    
+    /* الخدعة الكرييتف: ظل حاد ومصمت يعطي تأثير ثلاثي الأبعاد هندسي شيك */
+    box-shadow: 8px 8px 0px #74bacd; 
+    
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.modal-mic-img {
+            width: 100% !important;        
+            max-width: 100% !important;    
+            max-height: 400px !important;   
+            height: auto !important;       
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .close-modal-btn {
+            background: linear-gradient(135deg, #1D476E 0%, #1D476E 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(11, 94, 215, 0.3);
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+        .close-modal-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(11, 94, 215, 0.4);
+        }
+
+        /* 🌟 الـ CSS المطور والمصلح بالكامل للبطاقات التفاعلية لقتل الملل 🌟 */
+        #modalDesc {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;              
+            margin-top: 15px;
+            text-align: right;                 
+        }
+
+        mark {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .highlight-green {
+            background-color: #d9fdd3;
+            color: #1b5e20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ستايل البطاقة العامة */
+        .desc-card {
+            background-color: #fdfdfd;
+            border: 3px solid #e0e6ed;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            cursor: default;
+        }
+        .desc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(11, 94, 215, 0.08);
+            background-color: #f8fafc;
+        }
+
+        /* الأيقونة الصغيرة لكل بطاقة */
+        .desc-card-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        /* كلاسات الألوان المخصصة لكل بطاقة */
+        .desc-card.appearence .desc-card-icon {
+            background-color: #e0f2fe; 
+            color: #0c4a6e;
+            border: 2px solid #bae6fd;
+        }
+        .desc-card.step1 .desc-card-icon {
+            background-color: #ffe4e6; 
+            color: #881337;
+            border: 2px solid #fecdd3;
+        }
+        .desc-card.step2 .desc-card-icon {
+            background-color: #fef9c3; 
+            color: #854d0e;
+            border: 2px solid #fef08a;
+        }
+
+        .desc-card-content {
+            flex: 1;
+            text-align: right;
+        }
+        .desc-card-title {
+            font-size: 28px;
+            color: #0b5ed7;
+            font-weight: bold;
+            margin-bottom: 5px;
+            
+        }
+        .desc-card-text {
+            font-size: 26px !important;        
+            color: #2d3748 !important;
+            font-weight: bold !important;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* التنسيقات العامة للحاويات الخارجية */
+        .top-bars-container { 
+            position: relative; 
+            top: 20px; 
+            width: 100%; 
+            padding: 0 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 2000;
+            margin-bottom: 40px;
+        }
+        .glass-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); height: 70px; min-width: 350px; padding: 0 10px; border-radius: 60px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 20px; border: 2px solid #74bacd;}
+        .logos-bar img { height: 45px; width: auto; object-fit: contain;} 
+        .logo-mubadara, .logo-4 { height: 60px !important; }
+        
+        .search-box { display: flex; align-items: center; background: #f0f2f5; border-radius: 25px; padding: 5px 15px;}
+        .search-box input { border: none; outline: none; font-family: 'Cairo'; font-size: 14px; width: 100px; background: transparent; }
+        .accessibility-tools { display: flex; gap: 10px; align-items: center; }
+        .size-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #74bacd; color: #ffffff; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+  
+        .image-1 { position: fixed;  top: 0; left: 0;  width: 100%; height: 100%;  z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover;  }
+    
+    /* ستايل السهم المتحرك والنطاط */
+.guiding-arrow {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 42px;
+    color: #dc3545;
+    display: none; /* يتحكم به الجافا سكريبت */
+    animation: bounceArrow 0.6s infinite alternate;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+@keyframes bounceArrow {
+    from { top: -45px; }
+    to { top: -58px; }
+}
+
+/* مسافة علوية إضافية لشبكة الكروت لمنع تداخل الأسهم */
+.grid-apps {
+    margin-top: 45px !important;
+}
+
+/* جعل الكارت أبًا للسهم لضبط موضعه فوقه */
+.app-card {
+    position: relative !important;
+}
+
+/* مؤشر الإغلاق يظهر على يمين الزرار مباشرة ويتحرك أفقياً */
+.modal-close-pointer {
+    font-size: 45px;
+    position: absolute;
+    top: 50%;                    /* لتوسيط اليد عمودياً مع الزرار */
+    transform: translateY(-50%); /* ضبط التوسيط العمودي بدقة */
+    right: -55px;                /* دفع اليد خارج حدود الزرار جهة اليمين تماماً */
+    display: block;
+    animation: pointToButtonLeft 0.5s infinite alternate;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 20;
+    cursor: pointer;
+}
+
+/* أنيميشن ارتداد أفقي (من اليمين إلى اليسار باتجاه الزر) */
+@keyframes pointToButtonLeft {
+    from { 
+        transform: translateY(-50%) translateX(0); 
+    }
+    to { 
+        transform: translateY(-50%) translateX(-12px); /* تتحرك لليسار لتقترب من الزرار */
+    }
+}
+
+
+.scenarios-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 25px;
+    margin-bottom: 35px;
+}
+
+.scenario-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 25px 35px;
+    box-shadow: 0 10px 20px rgba(116, 186, 205, 0.15);
+    gap: 30px; /* يمنع تداخل الأزرار مع النصوص نهائياً */
+}
+
+.scenario-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    text-align: right;
+}
+
+/* شارات تصنيفات التطبيقات الملونة بالباستيل */
+.scenario-badge {
+    align-self: flex-start;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.scenario-badge.spiritual { background: #e0f2fe; color: #0369a1; }
+.scenario-badge.family { background: #dcfce7; color: #15803d; }
+.scenario-badge.news { background: #fee2e2; color: #b91c1c; }
+
+.scenario-text {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: #1a202c !important;
+    margin: 0 !important;
+    line-height: 1.5;
+}
+
+/* نص اللقاط المكتوب الذي سيظهر للمتعلم داخل كل كارت فرعي */
+.output-text {
+    font-size: 22px;
+    color: #0b5ed7;
+    font-weight: bold;
+    margin-top: 8px;
+}
+.output-text mark {
+    background-color: #fef08a;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.scenario-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 25px 35px;
+    box-shadow: 0 10px 20px rgba(116, 186, 205, 0.12);
+    gap: 30px; /* يعطي مسافة آمنة تمنع تداخل الزرار مع نصوص الكارت */
+}
+/* 🎙️ التصميم الافتراضي المحكم للزر الدائري النظيف قبل الضغط */
+.mic-action-btn {
+    background: #ffffff; 
+    color: #ff2a43; /* أيقونة المايك باللون الأحمر الافتراضي */
+    border: 4px solid #e2e8f0;
+    
+    /* أبعاد دائرية ثابتة ومحاذاة سنترية بالملي */
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 36px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative; /* أساسي لمنع تشوه العناصر المحيطة */
+}
+/* 🔴 التعديل: شكل الزرار لما يشتغل التسجيل (يقلب أحمر كامل والرمز للأبيض ويشغل التردد) 🔴 */
+.mic-action-btn.recording-active {
+    background: #ff2a43 !important; /* خلفية حمراء كاملة */
+    color: #ffffff !important;    /* الرمز يتحول للأبيض */
+    border-color: #ff6b7d !important;
+    
+    /* تشغيل أنيميشن التردد الحلقي المتسع المأخوذ من واجهة الهاتف */
+    animation: phoneMicRipple 1.3s infinite ease-in-out;
+}
+
+/* 🎨 التعديل: إضافة أنيميشن التردد الأخضر المتسع (الذي كان ناقصاً في كودك) */
+@keyframes phoneMicRipple {
+    0% {
+        transform: scale(1);
+        /* حلقات خضراء مكثفة ومضيئة ملاصقة تماماً لحافة الزر الدائري */
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.6), 
+                    0 0 0 0 rgba(40, 167, 69, 0.4);
+    }
+    50% {
+        transform: scale(1.04); /* نبض ناعم ومحكم للزر ليعطيه حيوية واقعية */
+    }
+    100% {
+        transform: scale(1);
+        /* تمدد الأمواج والترددات الخضراء للخارج لمسافات متباعدة ثم تتلاشى كلياً */
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0), 
+                    0 0 0 40px rgba(40, 167, 69, 0);
+    }
+}
+
+
+/*الخطوة الثالثة */
+/* 🌟 ستايل الخطوة الثالثة: كروت إرشادات التحدث الرقمي 🌟 */
+      /* 🌟 ستايل الخطوة الثالثة: كروت القواعد الذهبية بنفس ديزاين الخطوة الأولى 🌟 */
+        .rules-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-rules {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .rule-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 210px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .rule-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .rule-card .rule-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .rule-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 26px;
+            color: #1D476E;
+        }
+        
+        /* الـ CSS المخصص لبطاقات الشرح التفاعلية 3D بداخل المودال للخطوة الثالثة */
+        .desc-card.rule-style .desc-card-icon {
+            background-color: #fef9c3; 
+            color: #854d0e;
+            border: 2px solid #fef08a;
+        }
+
+
+/*الخطوة الرابعة */
+/* 🌟 ستايلات مخصصة ومبتكرة للخطوة الثالثة (التحدي والشهادة) 🌟 */
+       /* 🌟 ستايل الخطوة الثالثة: التحدي الرقمي الخماسي المطور 🌟 */
+      /* 🌟 ستايل الخطوة الرابعة المطور والموزون هندسياً 🌟 */
+/* 🌟 التعديل الهندسي النهائي لضبط أبعاد الخطوة الرابعة 🌟 */
+.quiz-wrapper {
+    max-width: 700px;
+    margin: 30px auto 50px auto; /* تم زيادة المسافة السفلية لراحة العين ومنع التداخل مع أسفل الشاشة */
+    position: relative;
+    /* تم إلغاء الـ min-height الثابتة لتجنب المشاكل البرمجية على الهواتف */
+}
+
+.quiz-card {
+    background: #fdfdfd;
+    border: 3px solid #1D476E;
+    border-radius: 20px;
+    padding: 30px 25px 35px 25px; /* تم زيادة الـ padding السفلي (35px) لضمان وجود مسافة أمان تحت الأزرار */
+    box-shadow: 8px 8px 0px #74bacd;
+    text-align: right;
+    display: none; 
+    
+    /* الخدعة البرمجية: تحويل الموضع إلى نسبي (relative) للكارت النشط لكي يتمدد الإطار تلقائياً */
+    position: relative; 
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* الكارت النشط يظهر بوضوح وبأبعاد مرنة */
+.quiz-card.active-card {
+    display: block;
+}
+        .quiz-question {
+            font-size: 26px;
+            font-weight: bold;
+            color: #1d476e;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .option-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+        }
+        .option-btn:hover {
+            border-color: #0b5ed7;
+            background: #f0f7ff;
+        }
+        .option-btn.correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+        .option-btn.wrong {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+        .quiz-progress {
+            font-size: 20px;
+            color: #74bacd;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        /* صندوق النتيجة النهائية المبهج بديل الشهادة */
+        .quiz-result-box {
+            display: none;
+            background: #ffffff;
+            border: 4px solid #28a745;
+            border-radius: 25px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(40,167,69,0.15);
+            animation: popIn 0.5s ease;
+        }
+        .stars-row {
+            font-size: 55px;
+            margin: 15px 0;
+            color: #f59e0b;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+/* 🌟 التعديل الهندسي لضبط يد الإشارة بجانب المايك من جهة الشمال (اليسار) 🌟 */
+.scenario-mic-arrow {
+    position: absolute;
+    top: 50%;                    /* لتوسيط اليد عمودياً مع زرار المايك */
+    transform: translateY(-50%); /* ضبط التوسيط العمودي بدقة */
+    left: -55px;                 /* الخدعة: دفع اليد خارج حدود الزرار جهة اليسار (الشمال) تماماً */
+    font-size: 45px;
+    color: #ff2a43;
+    animation: pointToMicRight 0.5s infinite alternate; /* تشغيل أنيميشن الارتداد جهة اليمين */
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    display: none;               /* يتم التحكم بالظهور التفاعلي عبر الجافا سكريبت لكارت الموقف الحياتي النشط */
+}
+
+/* أنيميشن ارتداد أفقي (من اليسار إلى اليمين لتقترب اليد وتخبط على زرار المايك) */
+@keyframes pointToMicRight {
+    from { 
+        transform: translateY(-50%) translateX(0); 
+    }
+    to { 
+        transform: translateY(-50%) translateX(12px); /* تتحرك لليمين لتقترب من زرار المايك */
+    }
+}
+
+/* تأمين موضع كارت الموقف الحياتي ليكون الحاضن الشرعي للأبعاد */
+.scenario-box {
+    position: relative !important;
+}
+
+
+        /* الشاشة الخضراء النهائية */
+        #finish-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 204, 113, 0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        #finish-screen h2 { font-size: 5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        #finish-screen p { font-size: 2rem; margin-bottom: 40px; }
+        .nav-btn {
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; background: white;
+            color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .nav-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+    </style>
+</head>
+<body>
+    <div class="image-1"><img src="1-images/number/Blue and White Page Border Geometric Shape A4.jpg" alt="خلفية"></div>
+
+
+<div id="finish-screen">
+    <i class="fas fa-check-circle" style="font-size: 8rem; margin-bottom: 20px;"></i>
+    <h2>أحسنت!</h2>
+    <p>لقد أتممت تعلم جميع الحروف بنجاح</p>
+    
+    <a href="2 page.html" style="text-decoration: none;">
+        <button class="nav-btn">الانتقال للمستوى التالي <i class="fas fa-arrow-left"></i></button>
+    </a>
+</div>
+
+
+<div class="top-bars-container">
+    <div class="glass-bar tools-bar"> 
+        <div class="accessibility-tools">
+            <button class="size-btn" onclick="changeFontSize(1.3)">A+</button>
+            <button class="size-btn" onclick="changeFontSize(1.0)">A</button>
+            <button class="size-btn" onclick="changeFontSize(0.8)">A-</button>
+        </div>
+        <div class="search-box"><input type="text" placeholder="بحث..."><i class="fas fa-search"></i></div>
+    </div>
+    <div class="glass-bar logos-bar">
+        <img src="1-images/اقرأ.png" alt="لوجو المبادرة" class="logo-mubadara">
+        <img src="1-images/2.png" alt="لوجو الوزارة">
+        <img src="1-images/1.png" alt="لوجو المشروع">
+        <img src="1-images/LOGO.png" alt="لوجو الرابع" class="logo-4">
+    </div>
+</div>
+
+<div class="container">
+<h1>الخطوة الأولى: الفهم والتعرف (التعليم البصري الواقعي)</h1>
+<ul> <li class="subtitle">اضغط على أي بطاقة لتشاهد <mark>"صورة هاتف واقعية ومكبرة"</mark> توضح لك بالضبط أين يقع زر المايك داخل كل تطبيق:-</li> </ul>   
+    <div class="apps-section">
+        <h2 style="font-size: 30px;color: #0b5ed7;font-weight: bold;"> اضغط على التطبيق لرؤية شكل المايك الحقيقي🎙️ </h2>
+        <div class="grid-apps">
+            <div class="app-card" onclick="showMic('google', 'بحث جوجل', 'https://png.pngtree.com/png-vector/20230817/ourmid/pngtree-google-internet-icon-vector-png-image_9183287.png', '1-images/number/1.jpg')">
+               <div class="guiding-arrow" id="arrow-google">👇</div>
+                <img src="https://png.pngtree.com/png-vector/20230817/ourmid/pngtree-google-internet-icon-vector-png-image_9183287.png" alt="جوجل">
+                <p>بحث جوجل</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+            <div class="app-card" onclick="showMic('youtube', 'يوتيوب', 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png', '1-images/number/2.jpg')">
+               <div class="guiding-arrow" id="arrow-youtube">👇</div>
+                <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="يوتيوب">
+                <p>يوتيوب</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+            <div class="app-card" onclick="showMic('whatsapp', 'الواتساب', 'https://cdn-icons-png.flaticon.com/512/733/733585.png', '1-images/number/3.jpg')">
+             <div class="guiding-arrow" id="arrow-whatsapp">👇</div>
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="واتساب">
+                <p>الواتساب</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<!-- الخطوة الثانية -->
+<div class="container" id="step-three-container">
+    <h1>الخطوة الثانية: قواعد وإرشادات التحدث الرقمي السليم</h1>
+    <ul> 
+        <li class="subtitle">اضغط على أي بطاقة لتتعلم <mark>"القواعد الذهبية الأربعة"</mark> لتضمن أن يفهم الهاتف كلامك بدقة:-</li> 
+    </ul>   
+    
+    <div class="rules-section">
+        <h2 style="font-size: 30px; color: #0b5ed7; font-weight: bold;"> اضغط على القاعدة الذهبية لتعلم مهارات النطق 🎙️ </h2>
+        <br>
+<div class="grid-rules">
+            
+            <div class="rule-card" onclick="showRule(1, 'الهدوء التام من حولك', '🤫')">
+                <div class="guiding-arrow" id="arrow-rule-1" style="display: block;">👇</div>
+                <span class="rule-emoji">🤫</span>
+                <p> الهدوء التام</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+            
+            <div class="rule-card" onclick="showRule(2, 'ترك مسافة آمنة ومريحة', '📏')">
+                <div class="guiding-arrow" id="arrow-rule-2">👇</div>
+                <span class="rule-emoji">📏</span>
+                <p> مسافة آمنة</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+            
+            <div class="rule-card" onclick="showRule(3, 'وضوح ونبرة طبيعية', '🗣️')">
+                <div class="guiding-arrow" id="arrow-rule-3">👇</div>
+                <span class="rule-emoji">🗣️</span>
+                <p> نبرة واضحة</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+
+            <div class="rule-card" onclick="showRule(4, 'التفكير قبل الكلام', '⏱️')">
+                <div class="guiding-arrow" id="arrow-rule-4">👇</div>
+                <span class="rule-emoji">⏱️</span>
+                <p> التفكير أولاً</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<br>
+<div class="container" id="step-two-container">
+    <h1>الخطوة الثالثة: التحدث الذكي (التدريب والمحاكاة الصوتية)</h1>
+   <ul> <li class="subtitle"> <mark>  انقر على "علامة المايك 🎙️" </mark> بجانب الموقف الحياتي وابدأ بقراءته بصوتك لتمكين مهارة التحدث الرقمي:-</li></ul>
+
+    <div class="scenarios-container">
+        
+      <div class="scenario-box">
+    <div class="scenario-info">
+        <span class="scenario-badge spiritual">تطبيق يوتيوب 📺</span>
+<div class="scenario-mic-arrow" id="arrow-mic-youtube" style="display: block;">👉</div>
+        <p class="scenario-text">"ارغب في ان أستمع الي سورة البقرة من الشيخ عبد الباسط"</p>
+        <div class="output-text" id="output-youtube">الكلام الذي ستقوله سيظهر هنا...</div>
+    </div>
+    <!-- الزر بدون الـ div الزائدة في آخره -->
+<button class="mic-action-btn" id="btn-youtube" data-video="2-videos/number/1.mp4" onclick="activateScenario('youtube', 'عايز أسمع قرآن الشيخ عبد الباسط')">🎙️</button></div>
+
+        <div class="scenario-box">
+            <div class="scenario-info">
+                <span class="scenario-badge family">تطبيق واتساب 💬</span>
+<div class="scenario-mic-arrow" id="arrow-mic-whatsapp" style="display: none;">👉</div>
+                <p class="scenario-text">"ارغب في ارسال رسالة صوتية"</p>
+                <div class="output-text" id="output-whatsapp">الكلام الذي ستقوله سيظهر هنا...</div>
+            </div>
+<button class="mic-action-btn" id="btn-whatsapp" data-video="2-videos/number/2.mp4" onclick="activateScenario('whatsapp', 'عايز أبعت فويس لأولادي وأحفادي')">🎙️</button>        </div>
+
+        <div class="scenario-box">
+            <div class="scenario-info">
+                <span class="scenario-badge news">تطبيق جوجل 🔍</span>
+<div class="scenario-mic-arrow" id="arrow-mic-google" style="display: none;">👉</div>
+                <p class="scenario-text">"اريد قرأه شريط الدواء"</p>
+                <div class="output-text" id="output-google">أنت قلت الفعلي ستظهر هنا...</div>
+            </div>
+<button class="mic-action-btn" id="btn-google" data-video="2-videos/number/3.mp4" onclick="activateScenario('google', 'عايز الموبايل يقرأ لي شريط الدواء')">🎙️</button>        </div>
+
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="micModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">شكل المايك</h3>
+        <img src="" alt="شكل المايك الحقيقي" class="modal-mic-img" id="modalImg">
+        <div id="modalDesc"></div> 
+<div style="position: relative; width: 100%; margin-top: 25px;">
+            <div class="modal-close-pointer">👈</div> 
+            <button class="close-modal-btn" onclick="closeModal()">فهمت، إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="videoModal">
+    <div class="modal-content" style="max-width: 700px;">
+        <h3 id="videoModalTitle" style="color: #28a745; font-size: 28px;">🎯 أحسنت! شاهد الطريقة العملية الآن:</h3>
+        
+        <video id="tutorialVideo" width="100%" height="auto" controls style="border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <source src="1-images/number/tutorial.mp4" type="video/mp4">
+            متصفحك لا يدعم تشغيل مقاطع الفيديو.
+        </video>
+        
+        <button class="close-modal-btn" onclick="closeVideoModal()" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); font-size: 24px;">فهمت الطريقة، إغلاق ✖️</button>
+    </div>
+</div>
+<br>
+
+<!-- الخطوة الرابعة -->
+<!-- 🌟 حاوية الخطوة الرابعة: التحدي الخماسي الذكي 🌟 -->
+<div class="container" id="step-four-container">
+    <h1>الخطوة الرابعة: التحدي الرقمي (تثبيت المهارة بالصور)</h1>
+    <ul> 
+        <li class="subtitle">أجب عن التحدي البصري بالضغط على 
+            <mark> الأزرار الكبير</mark>
+         :-</li> 
+    </ul>
+    
+    <div class="quiz-wrapper" id="quizWrapper">
+        
+        <div class="quiz-card active-card" id="q1">
+            <span class="quiz-progress" style="font-size: 24px;">السؤال 1 من 5</span>
+            <div class="quiz-question" style="font-size: 32px; text-align: center;">شكل المايك اللي بنضغط عليه عشان نتكلم:</div>
+            <div class="options-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                <button class="option-btn" onclick="handleQuizAnswer(this, true)" style="font-size: 45px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">🎙️ الـمـايـك</button>
+                <button class="option-btn" onclick="handleQuizAnswer(this, false)" style="font-size: 45px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">🔍 الـعـدسـة</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q2">
+            <span class="quiz-progress" style="font-size: 24px;">السؤال 2 من 5</span>
+            <div class="quiz-question" style="font-size: 32px; text-align: center;">في "جوجل"، بنضغط على المايك ضغطة واحدة سريعة؟</div>
+            <div class="options-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                <button class="option-btn" onclick="handleQuizAnswer(this, true)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👍 نـعـم (ضغطة واحدة)</button>
+                <button class="option-btn" onclick="handleQuizAnswer(this, false)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👎 لا (اضغط علطول)</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q3">
+            <span class="quiz-progress" style="font-size: 24px;">السؤال 3 من 5</span>
+            <div class="quiz-question" style="font-size: 32px; text-align: center;">عشان نبعت صوت في "الواتساب"، بنفضل دايسين ومثبتين صباعنا?</div>
+            <div class="options-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                <button class="option-btn" onclick="handleQuizAnswer(this, true)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👍 نـعـم (أفضل دايس)</button>
+                <button class="option-btn" onclick="handleQuizAnswer(this, false)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👎 لا (بشيل صباعي)</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q4">
+            <span class="quiz-progress" style="font-size: 24px;">السؤال 4 من 5</span>
+            <div class="quiz-question" style="font-size: 32px; text-align: center;">الرسالة في الواتساب بتتبعت أول ما نشيل صباعنا من المايك؟</div>
+            <div class="options-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                <button class="option-btn" onclick="handleQuizAnswer(this, true)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👍 نـعـم (بتتبعت علطول)</button>
+                <button class="option-btn" onclick="handleQuizAnswer(this, false)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👎 لا (بتتمسح)</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q5">
+            <span class="quiz-progress" style="font-size: 24px;">السؤال 5 من 5</span>
+            <div class="quiz-question" style="font-size: 32px; text-align: center;">عشان الموبايل يفهمني، لازم أتكلم في مكان هادئ وصوت واضح؟</div>
+            <div class="options-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                <button class="option-btn" onclick="handleQuizAnswer(this, true)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👍 نـعـم (مكان هادئ)</button>
+                <button class="option-btn" onclick="handleQuizAnswer(this, false)" style="font-size: 34px; text-align: center; padding: 25px; border: 3px solid #cbd5e1; box-shadow: 0 6px 0px #cbd5e1;">👎 لا (يكون فيه دوشة)</button>
+            </div>
+        </div>
+
+    </div>
+
+
+<script>
+    // 🌟 متغيرات عامة لمتابعة التطبيق والجملة المستهدفة حالياً في الخطوة الثانية
+    let activeApp = 'google'; 
+    let targetSentence = 'عايز الموبايل يقرأ لي شريط الدواء'; // القيمة الافتراضية المبدئية للتدريب
+    let currentStep = 'google'; // لمتابعة حركة السهم الإرشادي العلوي للكروت الأولى (الخطوة الأولى)
+    let currentRuleStep = 'rule1'; // أساسي لمتابعة السهم الإرشادي الخاص بالقواعد الذهبية (الخطوة الثانية)
+
+    // 🌟 دالة التحكم في عرض وإخفاء أسهم الكروت العلوية بالتناوب لتعليم كبار السن (الخطوة الأولى)
+    function updateGuidingArrow() {
+        const arrowGoogle = document.getElementById('arrow-google');
+        const arrowYoutube = document.getElementById('arrow-youtube');
+        const arrowWhitespace = document.getElementById('arrow-whatsapp');
+
+        if (arrowGoogle) arrowGoogle.style.display = 'none';
+        if (arrowYoutube) arrowYoutube.style.display = 'none';
+        if (arrowWhitespace) arrowWhitespace.style.display = 'none';
+
+        if (currentStep === 'google' && arrowGoogle) arrowGoogle.style.display = 'block';
+        if (currentStep === 'youtube' && arrowYoutube) arrowYoutube.style.display = 'block';
+        if (currentStep === 'whatsapp' && arrowWhitespace) arrowWhitespace.style.display = 'block';
+    }
+
+    // 🌟 دالة التحكم في حركة أسهم القواعد الذهبية بالتناوب (الخطوة الثانية) 🌟
+    function updateRuleGuidingArrow() {
+        const arrow1 = document.getElementById('arrow-rule-1');
+        const arrow2 = document.getElementById('arrow-rule-2');
+        const arrow3 = document.getElementById('arrow-rule-3');
+        const arrow4 = document.getElementById('arrow-rule-4');
+
+        if (arrow1) arrow1.style.display = 'none';
+        if (arrow2) arrow2.style.display = 'none';
+        if (arrow3) arrow3.style.display = 'none';
+        if (arrow4) arrow4.style.display = 'none';
+
+        if (currentRuleStep === 'rule1' && arrow1) arrow1.style.display = 'block';
+        if (currentRuleStep === 'rule2' && arrow2) arrow2.style.display = 'block';
+        if (currentRuleStep === 'rule3' && arrow3) arrow3.style.display = 'block';
+        if (currentRuleStep === 'rule4' && arrow4) arrow4.style.display = 'block';
+    }
+
+    // 🌟 دالة التحكم الذكي في ظهور يد الإشارة الجانبية فوق المايك المختار (الخطوة الثالثة) 🌟
+    function updateScenarioMicArrow(activeAppId) {
+        const arrowMicYoutube = document.getElementById('arrow-mic-youtube');
+        const arrowMicWhatsapp = document.getElementById('arrow-mic-whatsapp');
+        const arrowMicGoogle = document.getElementById('arrow-mic-google');
+
+        if (arrowMicYoutube) arrowMicYoutube.style.display = 'none';
+        if (arrowMicWhatsapp) arrowMicWhatsapp.style.display = 'none';
+        if (arrowMicGoogle) arrowMicGoogle.style.display = 'none';
+
+        const activeArrow = document.getElementById(`arrow-mic-${activeAppId}`);
+        if (activeArrow) activeArrow.style.display = 'block';
+    }
+
+    // تفعيل أول سهم للخطوات التوجيهية تلقائياً فور تحميل الصفحة
+    window.onload = function() {
+        updateGuidingArrow();
+        updateRuleGuidingArrow();
+    };
+
+    // 🌟 دالة فتح النافذة المنبثقة للخطوة الأولى (الفهم والتعرف البصري)
+    function showMic(app, appName, appLogoUrl, micImgUrl) {
+        document.getElementById('modalTitle').innerText = `شكل مايك تطبيق (${appName})`;
+        const modalImg = document.getElementById('modalImg');
+        modalImg.src = micImgUrl;
+        modalImg.className = "modal-mic-img"; 
+        if(app === 'google') modalImg.classList.add('google-size');
+        if(app === 'youtube') modalImg.classList.add('youtube-size');
+        if(app === 'whatsapp') modalImg.classList.add('whatsapp-size');
+
+        let desc = '';
+        if(app === 'google') {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">👁️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">مظهر الأيقونة:</span>
+                        <span class="desc-card-text">رمز مايكروفون <mark>رمادي</mark> مدمج جهة اليسار داخل مستطيل البحث الأبيض.</span>
+                    </div>
+                </div>
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">🔍</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">آلية الاستخدام:</span>
+                        <span class="desc-card-text">يتطلب النقر لمرة واحدة (نقرة مفردة) لتفعيل خاصية الاستقبال الفوري للأمر الصوتي بديلًا عن الإدخال النصي.</span>
+                    </div>
+                </div>`;
+            currentStep = 'youtube'; 
+        }
+        
+        if(app === 'youtube') {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">👁️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">مظهر الأيقونة:</span>
+                        <span class="desc-card-text">رمز مايكروفون مستقل يظهر بهيئة دائرة <mark>رمادية أو حمراء</mark> بجانب شريط البحث العلوي.</span>
+                    </div>
+                </div>
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">📺</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">آلية الاستخدام:</span>
+                        <span class="desc-card-text">يتم النقر المفرد على الأيقونة لمرة واحدة، مما يتيح استدعاء المقاطع المرئية والتلاوات القرآنية تلقائيًا عبر التعرف الرقمي على الصوت.</span>
+                    </div>
+                </div>`;
+            currentStep = 'whatsapp'; 
+        }
+
+        if(app === 'whatsapp') {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">👁️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">مظهر الأيقونة:</span>
+                        <span class="desc-card-text">رمز مايكروفون أبيض داخل <span class="highlight-green">دائرة خضراء</span> أسفل واجهة المحادثة.</span>
+                    </div>
+                </div>
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">☝️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">الخطوة الأولى:</span>
+                        <span class="desc-card-text">يتطلب الضغط المستمر (المطول) على الأيقونة طوال فترة تسجيل الإشارة الصوتية للمتعلم.</span>
+                    </div>
+                </div>
+                <div class="desc-card step2">
+                    <div class="desc-card-icon">✋</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">الخطوة الثانية:</span>
+                        <span class="desc-card-text">يتم إنهاء عملية التسجيل وإرسال الرسالة الصوتية تلقائياً فور رفع الإصبع عن الأيقونة.</span>
+                    </div>
+                </div>`;
+            currentStep = 'google'; 
+        }
+        document.getElementById('modalDesc').innerHTML = desc;
+        document.getElementById('micModal').classList.add('active');
+
+        updateGuidingArrow();
+    }
+
+    function closeModal() {
+        document.getElementById('micModal').classList.remove('active');
+    }
+
+    // 🌟 دالة تفعيل كروت المواقف الحياتية بالأسفل وتحديث الموقف النشط العلوي ديناميكياً 🌟
+    function activateScenario(app, phrase) {
+        activeApp = app;
+        targetSentence = phrase;
+
+        const targetBox = document.getElementById('target-phrase');
+        if (targetBox) {
+            targetBox.innerHTML = `الموقف الحالي النشط: <mark>"${targetSentence}"</mark>`;
+        }
+
+        // تحديث إشارة اليد لتظهر عند الكارت النشط الحالى فقط تلقائياً فور النقر
+        updateScenarioMicArrow(app);
+        startListeningProcess();
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    if (!SpeechRecognition) {
+        alert("متصفحك لا يدعم التعرف على الصوت، يرجى استخدام جوجل كروم.");
+    } else {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ar-EG'; 
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        function startListeningProcess() {
+            try {
+                recognition.start();
+            } catch(e) {
+                // تلافي حدوث استثناء إذا كان النظام يعمل بالفعل
+            }
+        }
+
+        recognition.onstart = () => {
+            const subBtn = document.getElementById(`btn-${activeApp}`);
+            const cardOutput = document.getElementById(`output-${activeApp}`);
+            const activeMicArrow = document.getElementById(`arrow-mic-${activeApp}`);
+            
+            // إخفاء سهم اليد مؤقتاً أثناء التحدث حتى لا يغطي على رمز التردد "〰️"
+            if(activeMicArrow) activeMicArrow.style.display = 'none';
+
+            if(subBtn) {
+                subBtn.classList.add('recording-active');
+                subBtn.innerHTML = "〰️"; 
+            }
+            if(cardOutput) {
+                cardOutput.innerText = "جاري تفعيل نظام الاستماع... تحدث الآن بصوت واضح";
+                cardOutput.style.color = "#28a745";
+            }
+        };
+
+        recognition.onerror = () => {
+            const subBtn = document.getElementById(`btn-${activeApp}`);
+            const cardOutput = document.getElementById(`output-${activeApp}`);
+            const activeMicArrow = document.getElementById(`arrow-mic-${activeApp}`);
+            
+            // إعادة إظهار السهم عند حدوث خطأ لإرشاد المتعلم للمحاولة مجدداً
+            if(activeMicArrow) activeMicArrow.style.display = 'block';
+
+            if(subBtn) {
+                subBtn.classList.remove('recording-active');
+                subBtn.innerHTML = "🎙️"; 
+            }
+            if(cardOutput) {
+                cardOutput.innerText = "تعذر التقاط الصوت، اضغط مجدداً وأعد المحاولة بصوت واضح";
+                cardOutput.style.color = "#dc3545";
+            }
+        };
+
+        recognition.onend = () => {
+            const subBtn = document.getElementById(`btn-${activeApp}`);
+            const activeMicArrow = document.getElementById(`arrow-mic-${activeApp}`);
+            
+            // إعادة إظهار السهم الإرشادي للمايك عند انتهاء التسجيل بنجاح
+            if(activeMicArrow) activeMicArrow.style.display = 'block';
+
+            if(subBtn) {
+                subBtn.classList.remove('recording-active');
+                subBtn.innerHTML = "🎙️";
+            }
+        };
+
+        recognition.onresult = (event) => {
+            const resultText = event.results[0][0].transcript;
+            
+            const cardOutput = document.getElementById(`output-${activeApp}`);
+            if(cardOutput) {
+                cardOutput.innerHTML = `أنت قلت الفعلي: <mark>"${resultText}"</mark>`;
+                cardOutput.style.color = "#0b5ed7";
+            }
+
+            const videoModal = document.getElementById('videoModal');
+            const tutorialVideo = document.getElementById('tutorialVideo');
+            const videoTitle = document.getElementById('videoModalTitle');
+            const subBtn = document.getElementById(`btn-${activeApp}`);
+            
+            if (videoModal && tutorialVideo && subBtn) {
+                const videoSource = subBtn.getAttribute('data-video');
+                tutorialVideo.src = videoSource;
+                
+                if (activeApp === 'youtube') {
+                    videoTitle.innerHTML = "🎯 أحسنت! شاهد طريقة البحث الصوتي على يوتيوب 📺";
+                } else if (activeApp === 'whatsapp') {
+                    videoTitle.innerHTML = "🎯 أحسنت! شاهد طريقة إرسال رسالة صوتية على الواتساب 💬";
+                } else {
+                    videoTitle.innerHTML = "🎯 أحسنت! شاهد طريقة البحث الصوتي على جوجل 🔍";
+                }
+                
+                tutorialVideo.load();
+                videoModal.classList.add('active');
+                tutorialVideo.play();
+            }
+
+            setTimeout(() => {
+                if(videoModal && videoModal.classList.contains('active')) {
+                    if (activeApp === 'youtube') {
+                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(resultText)}`, '_blank');
+                    } else if (activeApp === 'whatsapp') {
+                        // محاكاة نظام الواتساب التفاعلي
+                    } else {
+                        window.open(`https://www.google.com/search?q=${encodeURIComponent(resultText)}`, '_blank');
+                    }
+                }
+            }, 5000);
+        };
+    }
+
+    function closeVideoModal() {
+        const videoModal = document.getElementById('videoModal');
+        const tutorialVideo = document.getElementById('tutorialVideo');
+        if (videoModal) videoModal.classList.remove('active');
+        if (tutorialVideo) tutorialVideo.pause(); 
+    }
+
+    function changeFontSize(size) { 
+        document.body.style.zoom = size; 
+        if (size > 1) {
+            document.body.style.width = (size * 100) + "%";
+            document.body.style.position = "relative";
+            document.documentElement.style.overflowX = 'auto';
+        } else {
+            document.body.style.width = "100%";
+            document.documentElement.style.overflowX = 'hidden';
+        }
+    }
+
+    function showRule(ruleNumber, ruleName, ruleEmoji) {
+        const modalHeading = document.querySelector('#micModal .modal-content h3');
+        if (modalHeading) {
+            modalHeading.innerText = `القاعدة رقم (${ruleNumber}): ${ruleName}`;
+        }
+        
+        const modalImg = document.getElementById('modalImg');
+        if (modalImg) modalImg.style.display = 'none';
+
+        let desc = '';
+        if(ruleNumber === 1) {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">🤫</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">توجيه هام:</span>
+                        <span class="desc-card-text">تحدث دائماً في مكان <mark>هادئ تماماً</mark>.</span>
+                    </div>
+                </div>
+                <div class="desc-card rule-style">
+                    <div class="desc-card-icon">📺</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">السبب التعليمي:</span>
+                        <span class="desc-card-text">تأكد من إغلاق التلفزيون أو الراديو بجانبك لكي يركز ميكروفون الهاتف مع ذبذبات صوتك أنت فقط دون تشتت برمجّي.</span>
+                    </div>
+                </div>`;
+            currentRuleStep = 'rule2'; 
+        }
+        
+        if(ruleNumber === 2) {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">📏</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">توجيه هام:</span>
+                        <span class="desc-card-text">اجعل الهاتف على بُعد <mark>شبر واحد تقريباً</mark> من فمك.</span>
+                    </div>
+                </div>
+                <div class="desc-card rule-style">
+                    <div class="desc-card-icon">📱</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">السبب التعليمي:</span>
+                        <span class="desc-card-text">تجنب تقريب الهاتف بشدة من فمك أو إبعاده كلياً عنك، لكي تصل الموجات الصوتية بشكل معتدل ومقروء للنظام الرقمي.</span>
+                    </div>
+                </div>`;
+            currentRuleStep = 'rule3'; 
+        }
+
+        if(ruleNumber === 3) {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">🗣️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">توجيه هام:</span>
+                        <span class="desc-card-text">انطق الجملة <mark>بصوتك المعتاد</mark> ومخارج حروف واضحة.</span>
+                    </div>
+                </div>
+                <div class="desc-card rule-style">
+                    <div class="desc-card-icon">✨</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">السبب التعليمي:</span>
+                        <span class="desc-card-text">تحدث بنبرة طبيعية مريحة دون إسراع زائد ودون تقطيع شديد في العبارات، لكي يركب محرك المعالجة الكلمات بشكل صحيح.</span>
+                    </div>
+                </div>`;
+            currentRuleStep = 'rule4'; 
+        }
+
+        if(ruleNumber === 4) {
+            desc = `
+                <div class="desc-card appearence">
+                    <div class="desc-card-icon">⏱️</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">توجيه هام:</span>
+                        <span class="desc-card-text">حضّر الجملة <mark>في ذهنك أولاً</mark> قبل البدء.</span>
+                    </div>
+                </div>
+                <div class="desc-card rule-style">
+                    <div class="desc-card-icon">🎤</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">السبب التعليمي:</span>
+                        <span class="desc-card-text">اضغط على زر المايك وابدأ الكلام فوراً بدون تردد بمجرد ظهور علامة الاستماع على الشاشة لتلافي انتهاء مهلة اللقاط التلقائي.</span>
+                    </div>
+                </div>`;
+            currentRuleStep = 'rule1'; 
+        }
+
+        document.getElementById('modalDesc').innerHTML = desc;
+        document.getElementById('micModal').classList.add('active');
+        
+        updateRuleGuidingArrow(); 
+    }
+
+    closeModal = function() {
+        const modalImg = document.getElementById('modalImg');
+        if (modalImg) modalImg.style.display = 'block'; 
+        document.getElementById('micModal').classList.remove('active');
+        updateRuleGuidingArrow(); 
+    }
+
+    // 🌟 منطق جافا سكريبت التفاعلي للتنقل الذكي بين الأسئلة الخمسة (الخطوة الرابعة) 🌟
+
+    // 1. منطق الأسئلة
+    let currentQuestionIndex = 1;
+    const totalQuestions = 5;
+
+    function handleQuizAnswer(selectedButton, isCorrect) {
+        const currentCard = document.getElementById(`q${currentQuestionIndex}`);
+        const buttons = currentCard.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (isCorrect) {
+            selectedButton.classList.add('correct');
+            setTimeout(() => {
+                currentCard.classList.remove('active-card');
+                currentQuestionIndex++;
+
+                if (currentQuestionIndex <= totalQuestions) {
+                    document.getElementById(`q${currentQuestionIndex}`).classList.add('active-card');
+                } else {
+                    // هنا نهاية الاختبار: إخفاء الكويز وإظهار الشاشة الخضراء
+                    document.getElementById('quizWrapper').style.display = 'none';
+                    
+                    // استدعاء الشاشة الخضراء الصحيحة
+                    const finishScreen = document.getElementById('finish-screen');
+                    finishScreen.style.display = 'flex'; 
+                    
+                    // استدعاء دالة الاحتفال
+                    startCelebration();
+                }
+            }, 1000);
+        } else {
+            selectedButton.classList.add('wrong');
+            alert("إجابة غير صحيحة، حاول مجدداً!");
+            setTimeout(() => {
+                buttons.forEach(btn => { btn.disabled = false; btn.classList.remove('wrong'); });
+            }, 1000);
+        }
+    }
+
+    // 2. دالة الاحتفال (خارج دالة handleQuizAnswer)
+    function startCelebration() {
+        // تشغيل صوت النجاح (اختياري)
+        new Audio('1-sounds/success.mp3').play().catch(()=>{});
+        
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            
+            var particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    // 3. دالة الانتقال
+    function goToNextLevel() {
+        window.location.href = "page6.html"; 
+    }
+
+    // ... (أضيفي هنا باقي الدوال الخاصة بالمايك والخطوات 1-3) ...
+
+</script>
+
+
+</body>
+</html>

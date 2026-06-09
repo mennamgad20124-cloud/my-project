@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+         <title>الأمية المهنية 2 لذوي الاحتياجات </title>
+
+    <style>
+              * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            counter-reset: step-counter;
+            overflow: hidden;
+        }
+    
+        /* التنسيقات العامة للحاويات الخارجية */
+        .top-bars-container { 
+            position: fixed; 
+            top: 20px; 
+            width: 100%; 
+            padding: 0 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 2000;
+            margin-bottom: 40px;
+        }
+        .glass-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); height: 70px; min-width: 350px; padding: 0 10px; border-radius: 60px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 20px; border: 2px solid #30628e;}
+        .logos-bar img { height: 45px; width: auto; object-fit: contain;} 
+        .logo-mubadara, .logo-4 { height: 60px !important; }
+        
+        .search-box { display: flex; align-items: center; background: #f0f2f5; border-radius: 25px; padding: 5px 15px;}
+        .search-box input { border: none; outline: none; font-family: 'Cairo'; font-size: 14px; width: 100px; background: transparent; }
+        .accessibility-tools { display: flex; gap: 10px; align-items: center; }
+        .size-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #c5e2fd; color: #ffffff; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+  
+        .image-1 { position: fixed;  top: 0; left: 0;  width: 100%; height: 100%;  z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover;  }
+   
+     .container {
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px #74bacd;
+            padding: 30px;
+            max-width: 1500px;
+            width: 100%;
+            text-align: center; 
+            margin-top: 120px; /* مسافة 120 بكسل من الأعلى */
+    margin-bottom: 40px; /* مسافة من الأسفل */
+        }
+      
+        h1 {
+            color: #30628e;
+            font-size: 38px;
+            margin-bottom: 20px;
+            font-weight: bolder;
+            margin-top: 0;    /* تأكدي من عدم وجود مساحة فوق العنوان */
+        }
+        p.subtitle, li.subtitle {
+            color: #000000;
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        li.subtitle {
+            text-align: right;  
+        }
+        
+        /* قسم التعرف على المايك لكبار السن */
+        .apps-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-apps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .app-card {
+          background: white;
+    border: 4px solid #30628e; /* إطار أوضح */
+    border-radius: 25px;
+    padding: 30px;
+    width:420px;
+    min-height: 350px; /* طول ثابت لضمان عدم تداخل العناصر */
+    cursor: pointer;
+    transition: transform 0.1s; /* حركة أبطأ وأكثر ثباتاً */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .app-card:active {
+    transform: scale(0.98);
+    background-color: #eef6ff;
+}
+        .app-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .app-card img {
+            width: 100px;
+            height: 90px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+       
+        .click-hint {
+            font-size: 25px;
+            color: #007bff;
+            margin-top: 20px;
+            display: block;
+            font-weight: bold;
+        }
+         .desc-card-content {
+            flex: 1;
+            text-align: right;
+        }
+        .desc-card-title {
+            font-size: 28px;
+            color: #0b5ed7;
+            font-weight: bold;
+            margin-bottom: 5px;
+            
+        }
+        .desc-card-text {
+            font-size: 26px !important;        
+            color: #2d3748 !important;
+            font-weight: bold !important;
+            margin: 0;
+            line-height: 1.6;
+        }
+ mark {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+   /* تأثير الإضاءة عند النطق */
+.active-card {
+    border: 5px solid #ffcc00 !important; 
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #ffcc00 !important;
+}
+.modal-overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); /* خلفية معتمة */
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 40px;
+            width: 90%;
+            max-width: 1900px;
+            text-align: center;
+            border: 6px solid #30628e;
+        }
+        .modal-title { font-size: 45px; color: #30628e; margin-bottom: 40px; font-weight: bold; }
+        .modal-text { font-size: 38px; color: #333; margin: 20px 0;font-weight: bolder; }
+        .safety-alert { color: #d9534f; font-weight: bold; border: 2px solid #d9534f; padding: 15px; border-radius: 15px; margin: 20px 0;font-size: 30px; }
+        .close-btn { 
+            padding: 20px 80px; font-size: 40px; background: #30628e; 
+            color: white; border: none; border-radius: 20px; cursor: pointer; 
+            margin-top: 30px; 
+        }
+        .power-img { width: 100%; max-width: 300px; border-radius: 20px; margin-bottom: 20px; }
+
+  
+.quick-access-bar {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    display: flex;         /* يجعل العناصر في سطر واحد */
+    justify-content: center; /* لتوسيط الأزرار في منتصف الشاشة */
+    gap: 30px;            /* مسافة بين الأزرار */
+    z-index: 2500;
+}
+.quick-btn {
+ background: #30628e;   /* لون خلفية الزر */
+    color: white;          /* لون النص */
+    border: none;
+    border-radius: 20px;
+    padding: 20px 40px;    /* تكبير مساحة الزر لتسهيل اللمس */
+    font-size: 25px;       /* حجم الخط ليكون واضحاً */
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+   
+}
+.quick-btn:active {
+    transform: scale(0.95); /* تأثير عند الضغط */
+}
+#audio-control:hover { transform: scale(1.1); transition: 0.3s; }
+
+    </style>
+</head>
+<body>
+ <div class="image-1"><img src="1-images/spcail/31.jpg" alt="خلفية"></div>
+
+  <div class="container" role="main" aria-label="قسم أدوات المساعدة الرقمية">
+ 
+    <h1> الامية المهنية   </h1>
+
+   
+
+    <div class="apps-section">
+        <div class="grid-apps" style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <div id="mainModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2 id="modal-title" class="modal-title" style="color: #007bff;"></h2>
+        <p id="modal-text" class="modal-text"></p>
+        <button class="close-btn" onclick="closeModal()">فهمت</button>
+    </div>
+</div>
+
+
+<button class="app-card" id="card1"
+onclick="openModal('المهارات اليدوية ', '1-images/spcail/32.png', 
+    '<table style=\'width:100%; border-collapse: collapse; text-align: center; font-size: 26px; color:#30628e;\'>' +
+    '<tr>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;color:#30628e;\'>' +
+            '<b> الكروشيه والتريكو <br>' +
+        '</td>' +
+
+        '<td style=\'padding: 10px; border: 1px solid #ddd;color:#30628e;\'>' +
+            '<b> المسبحات أو الإكسسوارات <br>' +
+        '</td>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;color:#30628e;\'>' +
+            '<b> الزهور المجففة  <br>' +
+        '</td>' +
+    '</tr>' +
+    
+    '<tr>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/70.jpeg\' style=\'width:500px;height: 350px; margin-top:10px;\'>' +
+        '</td>' +
+        
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/71.jpeg\' style=\'width:500px;height: 350px; margin-top:10px;\'>' +
+        '</td>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/72.jpeg\' style=\'width:500px;height: 350px; margin-top:10px;\'>' +
+        '</td>' +
+    '</tr>' +
+     
+    
+    '</tr>' +
+    '</table>', true)"
+                >
+                   
+                   <div class="card-content">
+                    <h3 style="color: #30628e; font-size: 35px;font-weight: bolder;margin: 0 0 20px 0;">  المهارات اليدوية/المنزلية  </h3>
+                    <img src="1-images/spcail/28.png" alt="واتساب" style="  width: 180px; height: 150px;">
+                    
+                    <p style="color: #000000; font-size: 30px;font-weight: bold;margin: 0 0 15px 0;">
+أنامل مبدعة تحول الخامات البسيطة إلى قطع فنية بلمسة شخصية.                        </p>
+                   
+                </div>
+            </button>
+
+
+          
+<button class="app-card"  id="card2"
+onclick="openModal('المهارات التقنية ', '1-images/spcail/29.png', 
+
+
+
+    '<table style=\'width:100%; border-collapse: collapse; text-align: center; font-size: 24px;\'>' +
+
+
+        '<tr>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;\'><b>التعامل مع الأجهزة الذكية <b></td>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;\'><b>التسويق الرقمي<b></td>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;\'><b>الاستهلاك الذكي<b></td>' +
+
+        '</tr>' +
+    
+     '<tr>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/73.png\' style=\'width:550px; margin-top:10px;\'>' +
+        '</td>' +
+        
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/74.png\' style=\'width:520px; margin-top:10px;\'>' +
+        '</td>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/75.png\' style=\'width:520px; margin-top:10px;\'>' +
+        '</td>' +
+    '</tr>' +
+    '</table>', false)">   
+
+<div class="card-content">
+                    <h3 style="color: #30628e; font-size: 35px;font-weight: bolder;margin: 0 0 20px 0;"> المهارات التقنية </h3>
+                    <img src="1-images/spcail/29.png" alt="واتساب" style="  width: 180px; height: 150px;">
+                    <p style="color: #000000; font-size: 30px;font-weight: bold;margin: 0 0 15px 0;">
+تكنولوجيا سهلة ومبسطة تفتح لك أبواب التواصل والتعلم بضغطة زر.                        </p>
+                </div>
+            </button>
+
+
+
+
+<button class="app-card" id="card3"
+onclick="openModal('دليل الرموز', '1-images/spcail/30.png', 
+    '<table style=\'width:100%; border-collapse: collapse; text-align: center; font-size: 24px;\'>' +
+    
+        '<tr>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;text-align=center;\'><b> إدارة الوقت والمهام <b></td>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;\'><b>التمارين الحركية الخفيفة <b></td>' +
+        '<td style=\'padding: 15px; border: 1px solid #ddd;color:#30628e;\'><b> الثقافة المالية البسيطة<b></td>' +
+        '</tr>' +
+   
+     '<tr>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/76.png\' style=\'width:500px;height:300px; margin-top:10px;\'>' +
+        '</td>' +
+        
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/77.png\' style=\'width:500px;height:300px; margin-top:10px;\'>' +
+        '</td>' +
+        '<td style=\'padding: 10px; border: 1px solid #ddd;\'>' +
+            '<img src=\'1-images/spcail/78.png\' style=\'width:500px;height:300px; margin-top:10px;\'>' +
+        '</td>' +
+    '</tr>' +
+
+    '</table>', false)">                <div class="card-content">
+                    <h3 style="color: #30628e; font-size: 35px;font-weight: bolder;margin: 0 0 20px 0;"> المهارات الحياتية  </h3>
+                    <img src="1-images/spcail/30.png" alt="واتساب" style="  width: 180px; height: 150px;">
+                    <p style="color: #000000; font-size: 30px;font-weight: bold;margin: 0 0 15px 0;">
+نصائح ذكية وخطوات عملية تضمن لك حياة يومية أكثر راحة واستقلالية.                        </p>
+                </div>
+            </button>
+
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="top-bars-container">
+    <div class="glass-bar tools-bar"> 
+        <div class="accessibility-tools">
+            <button class="size-btn" onclick="changeFontSize(1.3)">A+</button>
+            <button class="size-btn" onclick="changeFontSize(1.0)">A</button>
+            <button class="size-btn" onclick="changeFontSize(0.8)">A-</button>
+        </div>
+        <div class="search-box"><input type="text" placeholder="بحث..."><i class="fas fa-search"></i></div>
+    </div>
+    <div class="glass-bar logos-bar">
+        <img src="1-images/اقرأ.png" alt="لوجو المبادرة" class="logo-mubadara">
+        <img src="1-images/2.png" alt="لوجو الوزارة">
+        <img src="1-images/1.png" alt="لوجو المشروع">
+        <img src="1-images/LOGO.png" alt="لوجو الرابع" class="logo-4">
+    </div>
+</div>
+<div class="quick-access-bar">
+    <button class="quick-btn" onclick="triggerCard('card1')"> المهارات اليدوية</button>
+    <button class="quick-btn" onclick="triggerCard('card2')">المهارات التقنية </button>
+    <button class="quick-btn" onclick="triggerCard('card3')">المهارات الحياتية </button>
+</div>
+
+ 
+    
+<div id="audio-control" onclick="toggleAudio()" style="position: fixed; top: 20px; right: 20px; z-index: 10000; cursor: pointer; background: white; padding: 15px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);margin-right: 1750px;margin-top: 150px;">
+    <i id="audio-icon" class="fas fa-volume-mute" style="font-size: 64px; color: #00568d;"></i>
+</div>
+
+<audio id="myAudio" loop>
+    <source src="3-audios/18.mp3" type="audio/mpeg">
+</audio>
+
+
+<script>
+  function changeFontSize(size) { 
+        document.body.style.zoom = size; 
+        if (size > 1) {
+            document.body.style.width = (size * 100) + "%";
+            document.body.style.position = "relative";
+            document.documentElement.style.overflowX = 'auto';
+        } else {
+            document.body.style.width = "100%";
+            document.documentElement.style.overflowX = 'hidden';
+        }
+    }
+
+
+function openModal(title, imgSrc, contentHTML, alertVisible) {
+    document.getElementById('modal-title').innerText = title;
+    
+    // نستخدم innerHTML لعرض القائمة التي سنرسلها
+    document.getElementById('modal-text').innerHTML = contentHTML;
+    
+    document.getElementById('mainModal').style.display = 'flex';
+}
+    function closeModal() {
+        document.getElementById('mainModal').style.display = 'none';
+    }
+function triggerCard(cardId) {
+    const card = document.getElementById(cardId);
+    
+    if (card) {
+        // 1. إضافة تأثير الإضاءة
+        card.classList.add('active-card');
+        
+        // 2. الانتظار ثانية واحدة
+        setTimeout(() => {
+            card.classList.remove('active-card');
+            
+            // 3. محاكاة الضغط على الزر الأصلي (سيفتح النافذة الخاصة به تلقائياً)
+            card.click(); 
+        }, 1000); 
+    }
+}
+
+
+const audio = document.getElementById("myAudio");
+const icon = document.getElementById("audio-icon");
+let isPlaying = false;
+
+function toggleAudio() {
+    if (isPlaying) {
+        audio.pause();
+        icon.className = "fas fa-volume-mute";
+    } else {
+        audio.play().catch(e => alert("يرجى التأكد من مسار ملف الصوت"));
+        icon.className = "fas fa-volume-up";
+    }
+    isPlaying = !isPlaying;
+}
+</script>
+</body>
+</html>
+  

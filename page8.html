@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأمية الرقمية 2 للعاديين</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            counter-reset: step-counter;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px #74bacd;
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center; 
+        }
+        h1::before {
+            counter-increment: step-counter; 
+            content: counter(step-counter) "- "; 
+        }
+        h1 {
+            color: #305A72;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: bolder;
+        }
+        p.subtitle, li.subtitle {
+            color: #000000;
+            font-size: 26px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        li.subtitle {
+            text-align: right;  
+        }
+        
+        /* قسم التعرف على المايك لكبار السن */
+        .apps-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-apps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .app-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .app-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .app-card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .app-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 28px;
+            color: #444;
+        }
+        .click-hint {
+            font-size: 20px;
+            color: #007bff;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* قسم المايك والتفاعل */
+        .mic-section {
+            margin: 40px 0;
+        }
+        .mic-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 40px;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        .mic-btn:hover {
+            transform: scale(1.05);
+        }
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #28a745;
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); }
+            100% { transform: scale(1); }
+        }
+        .status-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 15px;
+        }
+        .output-box {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2b2b2b;
+            min-height: 60px;
+            margin-top: 20px;
+            border-left: 5px solid #007bff;
+        }
+
+        /* ستايل النافذة المنبثقة لعرض المايك الحقيقي */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 25px;
+            max-width: 800px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+.modal-content h3 {
+    margin-top: 0;
+    color: #1D476E;
+    font-size: 34px;
+    font-weight: 800;
+    background-color: #ffffff;
+    padding: 15px 35px;
+    border: 3px solid #1D476E; /* إطار سميك ومحدد */
+    border-radius: 16px;
+    display: inline-block;
+    margin-bottom: 30px;
+    
+    /* الخدعة الكرييتف: ظل حاد ومصمت يعطي تأثير ثلاثي الأبعاد هندسي شيك */
+    box-shadow: 8px 8px 0px #74bacd; 
+    
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.modal-mic-img {
+            width: 100% !important;        
+            max-width: 800px !important;    
+            max-height: 450px !important;   
+            height: auto !important;       
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            object-fit: contain;            /* تضمن ظهور كامل الصورة بدون قص */
+        }
+        .close-modal-btn {
+            background: linear-gradient(135deg, #1D476E 0%, #1D476E 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(11, 94, 215, 0.3);
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+        .close-modal-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(11, 94, 215, 0.4);
+        }
+
+        /* 🌟 الـ CSS المطور والمصلح بالكامل للبطاقات التفاعلية لقتل الملل 🌟 */
+        #modalDesc {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;              
+            margin-top: 15px;
+            text-align: right;                 
+        }
+
+        mark {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .highlight-green {
+            background-color: #d9fdd3;
+            color: #1b5e20;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ستايل البطاقة العامة */
+        .desc-card {
+            background-color: #fdfdfd;
+            border: 3px solid #e0e6ed;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            cursor: default;
+        }
+        .desc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(11, 94, 215, 0.08);
+            background-color: #f8fafc;
+        }
+
+        /* الأيقونة الصغيرة لكل بطاقة */
+        .desc-card-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        /* كلاسات الألوان المخصصة لكل بطاقة */
+        .desc-card.appearence .desc-card-icon {
+            background-color: #e0f2fe; 
+            color: #0c4a6e;
+            border: 2px solid #bae6fd;
+        }
+        .desc-card.step1 .desc-card-icon {
+            background-color: #ffe4e6; 
+            color: #881337;
+            border: 2px solid #fecdd3;
+        }
+        .desc-card.step2 .desc-card-icon {
+            background-color: #fef9c3; 
+            color: #854d0e;
+            border: 2px solid #fef08a;
+        }
+
+        .desc-card-content {
+            flex: 1;
+            text-align: right;
+        }
+        .desc-card-title {
+            font-size: 28px;
+            color: #0b5ed7;
+            font-weight: bold;
+            margin-bottom: 5px;
+            
+        }
+        .desc-card-text {
+            font-size: 26px !important;        
+            color: #2d3748 !important;
+            font-weight: bold !important;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* التنسيقات العامة للحاويات الخارجية */
+        .top-bars-container { 
+            position: relative; 
+            top: 20px; 
+            width: 100%; 
+            padding: 0 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 2000;
+            margin-bottom: 40px;
+        }
+        .glass-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); height: 70px; min-width: 350px; padding: 0 10px; border-radius: 60px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 20px; border: 2px solid #74bacd;}
+        .logos-bar img { height: 45px; width: auto; object-fit: contain;} 
+        .logo-mubadara, .logo-4 { height: 60px !important; }
+        
+        .search-box { display: flex; align-items: center; background: #f0f2f5; border-radius: 25px; padding: 5px 15px;}
+        .search-box input { border: none; outline: none; font-family: 'Cairo'; font-size: 14px; width: 100px; background: transparent; }
+        .accessibility-tools { display: flex; gap: 10px; align-items: center; }
+        .size-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #74bacd; color: #ffffff; cursor: pointer; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+  
+        .image-1 { position: fixed;  top: 0; left: 0;  width: 100%; height: 100%;  z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover;  }
+    
+    /* ستايل السهم المتحرك والنطاط */
+.guiding-arrow {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 42px;
+    color: #dc3545;
+    display: none; /* يتحكم به الجافا سكريبت */
+    animation: bounceArrow 0.6s infinite alternate;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+@keyframes bounceArrow {
+    from { top: -45px; }
+    to { top: -58px; }
+}
+
+/* مسافة علوية إضافية لشبكة الكروت لمنع تداخل الأسهم */
+.grid-apps {
+    margin-top: 45px !important;
+}
+
+/* جعل الكارت أبًا للسهم لضبط موضعه فوقه */
+.app-card {
+    position: relative !important;
+}
+
+/* مؤشر الإغلاق يظهر على يمين الزرار مباشرة ويتحرك أفقياً */
+.modal-close-pointer {
+    font-size: 45px;
+    position: absolute;
+    top: 50%;                    /* لتوسيط اليد عمودياً مع الزرار */
+    transform: translateY(-50%); /* ضبط التوسيط العمودي بدقة */
+    right: -55px;                /* دفع اليد خارج حدود الزرار جهة اليمين تماماً */
+    display: block;
+    animation: pointToButtonLeft 0.5s infinite alternate;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 20;
+    cursor: pointer;
+}
+
+/* أنيميشن ارتداد أفقي (من اليمين إلى اليسار باتجاه الزر) */
+@keyframes pointToButtonLeft {
+    from { 
+        transform: translateY(-50%) translateX(0); 
+    }
+    to { 
+        transform: translateY(-50%) translateX(-12px); /* تتحرك لليسار لتقترب من الزرار */
+    }
+}
+
+
+.scenarios-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 25px;
+    margin-bottom: 35px;
+}
+
+.scenario-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 25px 35px;
+    box-shadow: 0 10px 20px rgba(116, 186, 205, 0.15);
+    gap: 30px; /* يمنع تداخل الأزرار مع النصوص نهائياً */
+}
+
+.scenario-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    text-align: right;
+}
+
+/* شارات تصنيفات التطبيقات الملونة بالباستيل */
+.scenario-badge {
+    align-self: flex-start;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.scenario-badge.spiritual { background: #e0f2fe; color: #0369a1; }
+.scenario-badge.family { background: #dcfce7; color: #15803d; }
+.scenario-badge.news { background: #fee2e2; color: #b91c1c; }
+
+.scenario-text {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: #1a202c !important;
+    margin: 0 !important;
+    line-height: 1.5;
+}
+
+/* نص اللقاط المكتوب الذي سيظهر للمتعلم داخل كل كارت فرعي */
+.output-text {
+    font-size: 22px;
+    color: #0b5ed7;
+    font-weight: bold;
+    margin-top: 8px;
+}
+.output-text mark {
+    background-color: #fef08a;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.scenario-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 25px 35px;
+    box-shadow: 0 10px 20px rgba(116, 186, 205, 0.12);
+    gap: 30px; /* يعطي مسافة آمنة تمنع تداخل الزرار مع نصوص الكارت */
+}
+/* 🎙️ التصميم الافتراضي المحكم للزر الدائري النظيف قبل الضغط */
+.mic-action-btn {
+    background: #ffffff; 
+    color: #ff2a43; /* أيقونة المايك باللون الأحمر الافتراضي */
+    border: 4px solid #e2e8f0;
+    
+    /* أبعاد دائرية ثابتة ومحاذاة سنترية بالملي */
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 36px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative; /* أساسي لمنع تشوه العناصر المحيطة */
+}
+/* 🔴 التعديل: شكل الزرار لما يشتغل التسجيل (يقلب أحمر كامل والرمز للأبيض ويشغل التردد) 🔴 */
+.mic-action-btn.recording-active {
+    background: #ff2a43 !important; /* خلفية حمراء كاملة */
+    color: #ffffff !important;    /* الرمز يتحول للأبيض */
+    border-color: #ff6b7d !important;
+    
+    /* تشغيل أنيميشن التردد الحلقي المتسع المأخوذ من واجهة الهاتف */
+    animation: phoneMicRipple 1.3s infinite ease-in-out;
+}
+
+/* 🎨 التعديل: إضافة أنيميشن التردد الأخضر المتسع (الذي كان ناقصاً في كودك) */
+@keyframes phoneMicRipple {
+    0% {
+        transform: scale(1);
+        /* حلقات خضراء مكثفة ومضيئة ملاصقة تماماً لحافة الزر الدائري */
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.6), 
+                    0 0 0 0 rgba(40, 167, 69, 0.4);
+    }
+    50% {
+        transform: scale(1.04); /* نبض ناعم ومحكم للزر ليعطيه حيوية واقعية */
+    }
+    100% {
+        transform: scale(1);
+        /* تمدد الأمواج والترددات الخضراء للخارج لمسافات متباعدة ثم تتلاشى كلياً */
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0), 
+                    0 0 0 40px rgba(40, 167, 69, 0);
+    }
+}
+
+
+/*الخطوة الثالثة */
+/* 🌟 ستايل الخطوة الثالثة: كروت إرشادات التحدث الرقمي 🌟 */
+      /* 🌟 ستايل الخطوة الثالثة: كروت القواعد الذهبية بنفس ديزاين الخطوة الأولى 🌟 */
+        .rules-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-rules {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .rule-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 210px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .rule-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .rule-card .rule-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .rule-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 26px;
+            color: #1D476E;
+        }
+        
+        /* الـ CSS المخصص لبطاقات الشرح التفاعلية 3D بداخل المودال للخطوة الثالثة */
+        .desc-card.rule-style .desc-card-icon {
+            background-color: #fef9c3; 
+            color: #854d0e;
+            border: 2px solid #fef08a;
+        }
+
+
+/*الخطوة الرابعة */
+/* 🌟 ستايلات مخصصة ومبتكرة للخطوة الثالثة (التحدي والشهادة) 🌟 */
+       /* 🌟 ستايل الخطوة الثالثة: التحدي الرقمي الخماسي المطور 🌟 */
+      /* 🌟 ستايل الخطوة الرابعة المطور والموزون هندسياً 🌟 */
+/* 🌟 التعديل الهندسي النهائي لضبط أبعاد الخطوة الرابعة 🌟 */
+.quiz-wrapper {
+    max-width: 700px;
+    margin: 30px auto 50px auto; /* تم زيادة المسافة السفلية لراحة العين ومنع التداخل مع أسفل الشاشة */
+    position: relative;
+    /* تم إلغاء الـ min-height الثابتة لتجنب المشاكل البرمجية على الهواتف */
+}
+
+.quiz-card {
+    background: #fdfdfd;
+    border: 3px solid #1D476E;
+    border-radius: 20px;
+    padding: 30px 25px 35px 25px; /* تم زيادة الـ padding السفلي (35px) لضمان وجود مسافة أمان تحت الأزرار */
+    box-shadow: 8px 8px 0px #74bacd;
+    text-align: right;
+    display: none; 
+    
+    /* الخدعة البرمجية: تحويل الموضع إلى نسبي (relative) للكارت النشط لكي يتمدد الإطار تلقائياً */
+    position: relative; 
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* الكارت النشط يظهر بوضوح وبأبعاد مرنة */
+.quiz-card.active-card {
+    display: block;
+}
+        .quiz-question {
+            font-size: 26px;
+            font-weight: bold;
+            color: #1d476e;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .option-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+        }
+        .option-btn:hover {
+            border-color: #0b5ed7;
+            background: #f0f7ff;
+        }
+        .option-btn.correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+        .option-btn.wrong {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+        .quiz-progress {
+            font-size: 20px;
+            color: #74bacd;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        /* صندوق النتيجة النهائية المبهج بديل الشهادة */
+        .quiz-result-box {
+            display: none;
+            background: #ffffff;
+            border: 4px solid #28a745;
+            border-radius: 25px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(40,167,69,0.15);
+            animation: popIn 0.5s ease;
+        }
+        .stars-row {
+            font-size: 55px;
+            margin: 15px 0;
+            color: #f59e0b;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+/* 🌟 التعديل الهندسي لضبط يد الإشارة بجانب المايك من جهة الشمال (اليسار) 🌟 */
+.scenario-mic-arrow {
+    position: absolute;
+    top: 50%;                    /* لتوسيط اليد عمودياً مع زرار المايك */
+    transform: translateY(-50%); /* ضبط التوسيط العمودي بدقة */
+    left: -55px;                 /* الخدعة: دفع اليد خارج حدود الزرار جهة اليسار (الشمال) تماماً */
+    font-size: 45px;
+    color: #ff2a43;
+    animation: pointToMicRight 0.5s infinite alternate; /* تشغيل أنيميشن الارتداد جهة اليمين */
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    display: none;               /* يتم التحكم بالظهور التفاعلي عبر الجافا سكريبت لكارت الموقف الحياتي النشط */
+}
+
+/* أنيميشن ارتداد أفقي (من اليسار إلى اليمين لتقترب اليد وتخبط على زرار المايك) */
+@keyframes pointToMicRight {
+    from { 
+        transform: translateY(-50%) translateX(0); 
+    }
+    to { 
+        transform: translateY(-50%) translateX(12px); /* تتحرك لليمين لتقترب من زرار المايك */
+    }
+}
+
+/* تأمين موضع كارت الموقف الحياتي ليكون الحاضن الشرعي للأبعاد */
+.scenario-box {
+    position: relative !important;
+}
+
+
+        /* الشاشة الخضراء النهائية */
+        #finish-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 204, 113, 0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        #finish-screen h2 { font-size: 5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        #finish-screen p { font-size: 2rem; margin-bottom: 40px; }
+        .nav-btn {
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; background: white;
+            color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .nav-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+
+/* الخطوة الاولي */
+ .container {
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px #74bacd;
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center; 
+        }
+        h1::before {
+            counter-increment: step-counter; 
+            content: counter(step-counter) "- "; 
+        }
+        h1 {
+            color: #396c89;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: bolder;
+        }
+        p.subtitle, li.subtitle {
+            color: #000000;
+            font-size: 26px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        li.subtitle {
+            text-align: right;  
+        }
+      
+        /* قسم التعرف على المايك لكبار السن */
+        .apps-section {
+            background-color: #f9f9f9;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-apps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .app-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .app-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.15);
+        }
+        .app-card img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+
+        /* تنسيق الأزرار الكبيرة للمحاكاة */
+.big-input-btn {
+    width: 100%;
+    padding: 25px;
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 20px;
+    border: 3px solid #74bacd;
+    background: white;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+/* شكل بطاقة المنبه النهائية مثل 6.jpg */
+.final-alarm-card {
+    background: #333;
+    color: white;
+    padding: 25px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+    mark {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .guiding-arrow {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 42px;
+    color: #dc3545;
+    display: none; /* يتحكم به الجافا سكريبت */
+    animation: bounceArrow 0.6s infinite alternate;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+    </style>
+</head>
+<body>
+    <div class="image-1"><img src="1-images/number/b2.jpg" alt="خلفية"></div>
+
+
+<div id="finish-screen">
+    <i class="fas fa-check-circle" style="font-size: 8rem; margin-bottom: 20px;"></i>
+    <h2>أحسنت!</h2>
+    <p>لقد أتممت تعلم جميع الحروف بنجاح</p>
+    
+    <a href="2 page.html" style="text-decoration: none;">
+        <button class="nav-btn">الانتقال للمستوى التالي <i class="fas fa-arrow-left"></i></button>
+    </a>
+</div>
+
+
+<div class="top-bars-container">
+    <div class="glass-bar tools-bar"> 
+        <div class="accessibility-tools">
+            <button class="size-btn" onclick="changeFontSize(1.3)">A+</button>
+            <button class="size-btn" onclick="changeFontSize(1.0)">A</button>
+            <button class="size-btn" onclick="changeFontSize(0.8)">A-</button>
+        </div>
+        <div class="search-box"><input type="text" placeholder="بحث..."><i class="fas fa-search"></i></div>
+    </div>
+    <div class="glass-bar logos-bar">
+        <img src="1-images/اقرأ.png" alt="لوجو المبادرة" class="logo-mubadara">
+        <img src="1-images/2.png" alt="لوجو الوزارة">
+        <img src="1-images/1.png" alt="لوجو المشروع">
+        <img src="1-images/LOGO.png" alt="لوجو الرابع" class="logo-4">
+    </div>
+</div>
+
+
+
+<!-- الخطوة الأولي  -->
+<div class="container">
+<h1>الخطوة الأولى: صحتك في ضغطة (تنظيم الحياة اليومية)</h1>
+<ul> <li class="subtitle"><mark> اضغط على أي تطبيق </mark>
+     لتتعلم كيف يسهل حياتك اليومية:-</li> </ul>   
+    <div class="apps-section">
+        <h2 style="font-size: 30px;color: #0a77b1;font-weight: bold;"> اضغط على أيقونة التطبيق لتبدأ 📱 </h2>
+        <div class="grid-apps">
+<div class="app-card" onclick="showAppInfo('alarm', 'المنبه', '⏰', '1-images/number/6.png')">
+<div id="arrow-rule-1" class="guiding-arrow">👇</div>
+                <img src="https://static.vecteezy.com/system/resources/previews/022/574/714/non_2x/modern-gradient-wall-clock-icon-free-png.png" alt="المنبه" class="alarm-icon">
+                <p>المنبه</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+            <div class="app-card" onclick="showAppInfo('whatsapp', 'الواتساب', '💬', '1-images/number/7.jpg')">
+<div id="arrow-rule-2" class="guiding-arrow">👇</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="واتساب" class="whatsapp-icon">
+                <p>الواتساب</p>
+                <span class="click-hint">اضغط هنا 🔍</span>
+            </div>
+    <div class="app-card" onclick="showAppInfo('vezeeta', 'فيزيتا', '🩺', '1-images/number/5.png')">
+<div id="arrow-rule-3" class="guiding-arrow">👇</div>
+  <img src="https://cdn-react.vezeeta.com/vezeeta-web-reactjs/jenkins-95/images/apple-icon-180x180.png" alt="فيزيتا" class="vezeeta-icon"> 
+    <p>فيزيتا</p>
+    <span class="click-hint">اضغط هنا 🔍</span>
+</div>
+        </div>
+    </div>
+</div>
+<div id="micModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modalTitle">شكل المايك</h3>
+        <img id="modalImg" src="" alt="صورة المايك" class="modal-mic-img">
+        <div id="modalDesc"></div> <button class="close-modal-btn" onclick="closeModal()">إغلاق النافذة ✖️</button>
+    </div>
+</div>
+<br>
+
+
+
+<!-- الخطوة الثانية -->
+<div class="container" style="margin-top: 30px;">
+    <h1>الخطوة الثانية: كيف أستخدم تطبيقاتي؟</h1>
+    <ul> <li class="subtitle"> <mark>اضغطي على الأيقونة  </mark>
+         لتعرفي خطوات استخدام كل تطبيق:-</li> </ul>
+    
+    <div class="apps-section">
+                            <h2 style="font-size: 30px;color: #0a77b1;font-weight: bold;"> اضغط على أيقونة التطبيق لتبدأ 📱 </h2>
+
+        <div class="grid-apps">
+
+            <!-- أيقونة المنبه -->
+           <div class="app-card" onclick="showTips('alarm', 'المنبه', '1-images/number/8.png')">
+<div class="guiding-arrow" id="arrow-step2-1">👇</div>
+         <img src="https://static.vecteezy.com/system/resources/previews/022/574/714/non_2x/modern-gradient-wall-clock-icon-free-png.png" alt="المنبه" class="alarm-icon">
+    <p>المنبه</p>
+    <span class="click-hint">اضغطي للنصيحة</span>
+</div>
+<div class="app-card" onclick="showTips('whatsapp', 'الواتساب', '1-images/number/9.png')">
+<div class="guiding-arrow" id="arrow-step2-2">👇</div>
+ <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="واتساب" class="whatsapp-icon">
+    <p>الواتساب</p>
+    <span class="click-hint">اضغطي للنصيحة</span>
+</div>
+<div class="app-card" onclick="showTips('vezeeta', 'فيزيتا', '1-images/number/101.png')">
+<div class="guiding-arrow" id="arrow-step2-3">👇</div>
+<img src="https://cdn-react.vezeeta.com/vezeeta-web-reactjs/jenkins-95/images/apple-icon-180x180.png" alt="فيزيتا" class="vezeeta-icon"> 
+    <p>فيزيتا</p>
+    <span class="click-hint">اضغطي للنصيحة</span>
+</div>
+    </div>
+</div>
+</div>
+<br>
+
+
+
+<div class="container" style="margin-top: 30px;">
+    
+    <h1>الخطوة الثالثة: جربي بنفسك الآن!</h1>
+    <ul> <li class="subtitle"><mark> اضغطي على أيقونة التطبيق </mark>
+       
+        لفتح صفحة التطبيق أو المحاكاة الخاصة به:-</li> </ul>
+    
+    <div class="apps-section">
+                            <h2 style="font-size: 30px;color: #0a77b1;font-weight: bold;"> اضغط على أيقونة التطبيق لتبدأ 📱 </h2>
+
+        <div class="grid-apps">
+           <div class="app-card" onclick="runSimulation('alarm')">
+<div class="guiding-arrow" id="arrow-step3-1">👇</div>
+            <img src="https://static.vecteezy.com/system/resources/previews/022/574/714/non_2x/modern-gradient-wall-clock-icon-free-png.png" alt="المنبه" class="alarm-icon">
+    <p style="font-size: 28px;"> منبه الدواء</p>
+    <span class="click-hint">جربي الآن 🚀</span>
+    <div id="alarmResultsContainer" style="width: 100%; max-width: 600px; margin: 20px auto;"></div>
+</div>
+            
+          <div class="app-card" onclick="runWhatsAppSim()">
+<div class="guiding-arrow" id="arrow-step3-2">👇</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="واتساب" class="whatsapp-icon">
+    <p>فتح الواتساب</p>
+    <span class="click-hint">جربي المحاكاة 🚀</span>
+</div>
+          <div class="app-card" onclick="runVezeetaSim()">
+<div class="guiding-arrow" id="arrow-step3-3">👇</div>
+            <img src="https://cdn-react.vezeeta.com/vezeeta-web-reactjs/jenkins-95/images/apple-icon-180x180.png" alt="فيزيتا" class="vezeeta-icon"> 
+    <p>افتحي فيزيتا</p>
+    <span class="click-hint">جربي المحاكاة 🚀</span>
+</div>
+        </div>
+    </div>
+</div>
+<script>
+    // اكواد الشريط العلوي ازرار التكبير والتصغير والتوسط
+    function changeFontSize(size) { 
+        document.body.style.zoom = size; 
+        if (size > 1) {
+            document.body.style.width = (size * 100) + "%";
+            document.body.style.position = "relative";
+            document.documentElement.style.overflowX = 'auto';
+        } else {
+            document.body.style.width = "100%";
+            document.documentElement.style.overflowX = 'hidden';
+        }
+    }
+
+// الخطوة الاولي
+
+  
+    // الدالة المحدثة لشرح التطبيقات
+    function showAppInfo(app, appName, icon, imgUrl) {
+        document.getElementById('modalTitle').innerText = `طريقة استخدام (${appName})`;
+        document.getElementById('modalImg').src = imgUrl;
+
+        let desc = '';
+        if(app === 'alarm') {
+            desc = `
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">➕</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">ضبط الدواء:</span>
+                        <span class="desc-card-text">اضغطي على علامة <mark>( + )</mark> واكتبي اسم الدواء (مثلاً: دواء السكر) لتتذكري موعده.</span>
+                    </div>
+                </div>`;
+        } else if(app === 'whatsapp') {
+            desc = `
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">📷</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">مشاركة عملك:</span>
+                        <span class="desc-card-text">اضغطي على أيقونة <mark>الكاميرا</mark> لتصوير منتجك (خياطة أو طبخ) وإرساله لأهلك.</span>
+                    </div>
+                </div>`;
+        } else if(app === 'vezeeta') {
+            desc = `
+                <div class="desc-card step1">
+                    <div class="desc-card-icon">⭐</div>
+                    <div class="desc-card-content">
+                        <span class="desc-card-title">اختيار الطبيب:</span>
+                        <span class="desc-card-text">شاهدي <mark>النجوم والتقييمات</mark> أسفل اسم الدكتور قبل أن تقرري حجز الموعد.</span>
+                    </div>
+                </div>`;
+        }
+        
+        document.getElementById('modalDesc').innerHTML = desc;
+        document.getElementById('micModal').classList.add('active');
+        updateArrows();}
+    
+let currentStep1 = 'arrow-rule-1';
+let currentStep2 = 'arrow-step2-1'; // نبدأ دائماً بالسهم الأول للخطوة الثانية
+let currentStep3 = 'arrow-step3-1'; // نبدأ دائماً بالسهم الأول للخطوة الثالثة
+
+let activeSection = 1; // 1 للخطوة الأولى، 2 للثانية، 3 للثالثة
+function updateArrows() {
+    // 1. إخفاء كل الأسهم في الصفحة
+    const allArrows = document.querySelectorAll('.guiding-arrow');
+    allArrows.forEach(a => a.style.display = 'none');
+
+    // 2. إظهار السهم بناءً على القسم النشط
+    let activeArrowId = null;
+
+    if (activeSection === 1) {
+        activeArrowId = currentStep1;
+    } else if (activeSection === 2) {
+        activeArrowId = currentStep2;
+    } else if (activeSection === 3) {
+        activeArrowId = currentStep3;
+    }
+
+    // 3. إظهار السهم النشط
+    const arrow = document.getElementById(activeArrowId);
+    if (arrow) {
+        arrow.style.display = 'block';
+    }
+}
+function closeModal() {
+    document.getElementById('micModal').classList.remove('active');
+    window.speechSynthesis.cancel();
+    
+    if (activeSection === 1) {
+        if (currentStep1 === 'arrow-rule-1') currentStep1 = 'arrow-rule-2';
+        else if (currentStep1 === 'arrow-rule-2') currentStep1 = 'arrow-rule-3';
+        else if (currentStep1 === 'arrow-rule-3') {
+            activeSection = 2; 
+            currentStep2 = 'arrow-step2-1'; // تأكيد: السهم في الخطوة الثانية يبدأ بالأولى
+        }
+    } 
+    else if (activeSection === 2) {
+        if (currentStep2 === 'arrow-step2-1') currentStep2 = 'arrow-step2-2';
+        else if (currentStep2 === 'arrow-step2-2') currentStep2 = 'arrow-step2-3';
+        else if (currentStep2 === 'arrow-step2-3') {
+            activeSection = 3; 
+            currentStep3 = 'arrow-step3-1'; // تأكيد: السهم في الخطوة الثالثة يبدأ بالأولى
+        }
+    }
+    else if (activeSection === 3) {
+        if (currentStep3 === 'arrow-step3-1') currentStep3 = 'arrow-step3-2';
+        else if (currentStep3 === 'arrow-step3-2') currentStep3 = 'arrow-step3-3';
+        else if (currentStep3 === 'arrow-step3-3') {
+            // هنا انتهينا من كل شيء!
+            document.getElementById('finish-screen').style.display = 'flex'; // إظهار الشاشة الخضراء
+            startCelebration(); // تشغيل الاحتفال
+            
+            // إعادة التعيين للبداية في حال أرادت المستخدمة البدء من جديد
+            currentStep1 = 'arrow-rule-1';
+            currentStep2 = 'arrow-step2-1';
+            currentStep3 = 'arrow-step3-1';
+            activeSection = 1;
+        }
+    }
+    
+    updateArrows();
+}
+
+window.onload = updateArrows;
+
+    // دالة عرض إرشادات الخطوة الثانية
+function showTips(app, appName, imgUrl) { // أضفنا imgUrl هنا
+    document.getElementById('modalTitle').innerText = `إرشادات الاستخدام (${appName})`;
+    document.getElementById('modalImg').src = imgUrl; // السطر المفقود لضبط الصورة
+    
+    let tips = '';
+    if(app === 'alarm') {
+        tips = `
+            <div class="desc-card step2">
+                <div class="desc-card-icon">💡</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">نصيحة ذهبية:</span>
+                    <span class="desc-card-text">اربطي مكان المنبه بمكان الدواء لتعزيز الذاكرة، ولا تنسي تفعيل خيار "تكرار" ليذكركِ يومياً.</span>
+                </div>
+            </div>`;
+    } else if(app === 'whatsapp') {
+        tips = `
+            <div class="desc-card step2">
+                <div class="desc-card-icon">🌟</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">نصيحة الخصوصية:</span>
+                    <span class="desc-card-text">شاركي إبداعاتك مع أهلك، وتذكري دائماً عدم الرد على أي أرقام غريبة للحفاظ على أمانك.</span>
+                </div>
+            </div>`;
+    } else if(app === 'vezeeta') {
+        tips = `
+            <div class="desc-card step2">
+                <div class="desc-card-icon">🛡️</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">نصيحة الحجز:</span>
+                    <span class="desc-card-text">اهتمي بقراءة تعليقات المرضى السابقين، واحفظي كود الحجز دائماً لتسهيل دخولك للعيادة.</span>
+                </div>
+            </div>`;
+    }
+    document.getElementById('modalDesc').innerHTML = tips;
+    document.getElementById('micModal').classList.add('active');
+    
+    // صوت إرشادي
+  updateArrows();}
+
+
+
+function showPractice(app, appName, icon) {
+    document.getElementById('modalTitle').innerText = `تحدي التطبيق العملي (${appName})`;
+    // لا نحتاج صورة هنا، لذا نضع صورة فارغة أو نخفيها
+    document.getElementById('modalImg').src = ""; 
+    
+    let practice = '';
+    if(app === 'alarm') {
+        practice = `
+            <div class="desc-card step1">
+                <div class="desc-card-icon">🚀</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">المهمة:</span>
+                    <span class="desc-card-text">تخيلي أنكِ ستحتاجين دواءك غداً في الساعة السابعة صباحاً. هل يمكنكِ فتح المنبه وضبطه الآن؟</span>
+                </div>
+            </div>`;
+    } else if(app === 'whatsapp') {
+        practice = `
+            <div class="desc-card step1">
+                <div class="desc-card-icon">📸</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">المهمة:</span>
+                    <span class="desc-card-text">تخيلي أنكِ طبختِ أكلة شهية اليوم. افتحي الواتساب، التقطي صورة، وأرسليها لأحد أبنائكِ.</span>
+                </div>
+            </div>`;
+    } else if(app === 'vezeeta') {
+        practice = `
+            <div class="desc-card step1">
+                <div class="desc-card-icon">🏥</div>
+                <div class="desc-card-content">
+                    <span class="desc-card-title">المهمة:</span>
+                    <span class="desc-card-text">ابحثي عن دكتور عيون في منطقتكِ، واختاري موعداً مناسباً لحجز كشف جديد.</span>
+                </div>
+            </div>`;
+    }
+    
+    document.getElementById('modalDesc').innerHTML = practice;
+    document.getElementById('micModal').classList.add('active');
+}
+
+
+function runSimulation(app) {
+    // نغير العنوان هنا ليكون مناسباً لضبط المنبه
+    document.getElementById('modalTitle').innerText = "ضبط منبه الدواء";
+    
+    if (app === 'alarm') {
+        let simHTML = `
+            <div style="text-align: right;">
+                <label style="font-size: 22px; font-weight: bold;">اختاري الوقت:</label>
+                <input type="time" id="simTime" style="font-size: 40px; padding: 15px; width: 100%; border-radius: 15px; border: 3px solid #007bff; margin-bottom: 20px;">
+                
+                <label style="font-size: 22px; font-weight: bold;">اسم الدواء:</label>
+                <input type="text" id="simMedicine" placeholder="مثلاً: دواء السكر" style="font-size: 28px; padding: 15px; width: 100%; border-radius: 15px; border: 3px solid #ddd;">
+            </div>
+            <button onclick="saveAlarm()" class="close-modal-btn" style="margin-top: 25px; font-size: 28px;">حفظ المنبه ✅</button>
+        `;
+        document.getElementById('modalDesc').innerHTML = simHTML;
+        document.getElementById('micModal').classList.add('active');
+        document.getElementById('modalImg').style.display = 'none'; // <-- هذا السطر سيخفيها
+    }
+}
+function saveAlarm() {
+    const med = document.getElementById('simMedicine').value;
+    const time = document.getElementById('simTime').value;
+    
+    if(time && med) {
+        // تحويل التوقيت لشكل 09:00 م
+        let [hours, minutes] = time.split(':');
+        let ampm = hours >= 12 ? 'م' : 'ص';
+        hours = hours % 12 || 12;
+        const displayTime = hours + ":" + minutes + " " + ampm; 
+
+        // تغيير محتوى النافذة المنبثقة لعرض البطاقة
+        const modalDesc = document.getElementById('modalDesc');
+        modalDesc.innerHTML = `
+            <div style="background: #2b2b2b; color: white; padding: 30px; border-radius: 25px; display: flex; justify-content: space-between; align-items: center; direction: rtl; margin-top: 20px;">
+                <div style="background: #3b82f6; width: 60px; height: 30px; border-radius: 15px; position: relative;">
+                    <div style="background: white; width: 25px; height: 25px; border-radius: 50%; position: absolute; left: 30px; top: 2.5px;"></div>
+                </div>
+                <div style="text-align: left;">
+                    <div style="font-size: 40px; font-weight: bold;">${displayTime}</div>
+                    <div style="font-size: 22px; color: #a0a0a0;">مرة | ${med}</div>
+                </div>
+            </div>
+            <p style="font-size: 20px; margin-top: 20px; color: #28a745; font-weight: bold;">تم ضبط المنبه بنجاح! ✅</p>
+        `;
+        
+        // تغيير زر الإغلاق ليكون أوضح
+        document.querySelector('.close-modal-btn').innerText = "تم، إغلاق ✖️";
+        
+        confetti(); // تأثير احتفالي
+    } else {
+        alert("من فضلك اختاري الوقت واكتبي اسم الدواء");
+    }
+}
+
+// دالة إرسال الرسالة
+function sendWhatsAppMessage() {
+    // نجلب العناصر من داخل النافذة
+    const msgInput = document.getElementById('msgInput');
+    const chatWindow = document.getElementById('chatWindow');
+    
+    if(msgInput && msgInput.value.trim() !== "") {
+        // إنشاء فقاعة الرسالة
+        const message = document.createElement('div');
+        message.style.cssText = "background: #dcf8c6; padding: 15px; border-radius: 15px; width: fit-content; margin-left: auto; margin-bottom: 10px; font-size: 22px; margin-right: 5px;";
+        message.innerText = msgInput.value;
+        
+        chatWindow.appendChild(message);
+        chatWindow.scrollTop = chatWindow.scrollHeight; // النزول لأسفل الشات تلقائياً
+        msgInput.value = ''; // مسح خانة الكتابة
+        confetti(); // تأثير احتفالي
+    }
+}
+function showImagePreview() {
+    const chatWindow = document.getElementById('chatWindow');
+    const fileInput = document.getElementById('imgInput');
+    
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // إنشاء عنصر الصورة
+            const imgElement = document.createElement('img');
+            imgElement.src = e.target.result; // هنا يتم وضع مسار الصورة الفعلي
+            imgElement.style.cssText = "max-width: 150px; border-radius: 10px; margin-bottom: 10px; display: block;";
+            
+            // إنشاء حاوية للرسالة
+            const message = document.createElement('div');
+            message.style.cssText = "background: #dcf8c6; padding: 10px; border-radius: 15px; width: fit-content; margin-left: auto; margin-bottom: 10px;";
+            
+            message.appendChild(imgElement);
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        reader.readAsDataURL(fileInput.files[0]); // قراءة الصورة
+    }
+}
+
+// دالة المحاكاة (تأكدي أنها تستدعي الدوال أعلاه)
+function runWhatsAppSim() {
+    document.getElementById('modalImg').style.display = 'none';
+    document.getElementById('modalTitle').innerText = "محاكاة إرسال رسالة";
+
+    let simHTML = `
+        <div id="chatWindow" style="background: #e5ddd5; padding: 15px; border-radius: 15px; height: 200px; overflow-y: auto; text-align: right; margin-bottom: 20px; border: 2px solid #ddd;">
+            <div style="background: white; padding: 10px; border-radius: 10px; width: fit-content; margin-bottom: 10px;">أهلاً بكِ! ابدئي التجربة.</div>
+        </div>
+        
+        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 25px;">
+            <input type="file" id="imgInput" style="display: none;" onchange="showImagePreview()">
+            <button onclick="document.getElementById('imgInput').click()" style="padding: 20px 30px; font-size: 35px; border-radius: 20px; border: none; background: #ddd; cursor: pointer;">📷</button>
+            
+            <input type="text" id="msgInput" placeholder="اكتبي رسالتك هنا..." style="flex: 1; padding: 20px; font-size: 22px; border-radius: 20px; border: 2px solid #ccc;">
+            
+            <button onclick="sendWhatsAppMessage()" style="background: #25D366; border: none; padding: 20px 30px; font-size: 22px; font-weight: bold; border-radius: 20px; color: white; cursor: pointer;">إرسال</button>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
+            <a href="https://web.whatsapp.com" target="_blank" style="font-size: 22px; color: #007bff; text-decoration: underline; font-weight: bold;">
+                📱 اضغطي هنا لفتح تطبيق الواتساب الحقيقي
+            </a>
+        </div>
+    `;
+    
+    document.getElementById('modalDesc').innerHTML = simHTML;
+    document.getElementById('micModal').classList.add('active');
+}
+function runVezeetaSim() {
+    // إخفاء الصورة في نافذة المحاكاة
+    document.getElementById('modalImg').style.display = 'none';
+    document.getElementById('modalTitle').innerText = "محاكاة حجز طبيب";
+
+    let simHTML = `
+        <div id="vezeetaSteps" style="text-align: right; padding: 10px;">
+            <p style="font-size: 22px; font-weight: bold;">1. اختاري التخصص:</p>
+            <select id="specSelect" style="width: 100%; padding: 15px; font-size: 20px; border-radius: 10px;">
+                <option>دكتور عيون</option>
+                <option>دكتور عظام</option>
+            </select>
+
+            <p style="font-size: 22px; font-weight: bold; margin-top: 15px;">2. اختاري الدكتور:</p>
+            <select id="docSelect" style="width: 100%; padding: 15px; font-size: 20px; border-radius: 10px;">
+                <option value="د. أحمد محمد">د. أحمد محمد (⭐⭐⭐)</option>
+                <option value="د. سارة محمود">د. سارة محمود (⭐⭐⭐⭐)</option>
+                <option value="د. علي كمال">د. علي كمال (⭐⭐⭐⭐⭐)</option>
+            </select>
+        </div>
+        
+        <div id="bookingResult" style="margin-top: 20px;"></div>
+
+        <button id="confirmBtn" onclick="confirmVezeeta()" class="close-modal-btn" style="background: #007bff; margin-top: 25px; font-size: 24px;">تأكيد الحجز ✅</button>
+
+        <div style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
+            <a href="https://www.vezeeta.com/ar" target="_blank" style="font-size: 20px; color: #007bff; text-decoration: underline; font-weight: bold;">
+                🏥 اضغطي هنا لفتح موقع فيزيتا الحقيقي
+            </a>
+        </div>
+    `;
+    
+    document.getElementById('modalDesc').innerHTML = simHTML;
+    document.getElementById('micModal').classList.add('active');
+}
+
+function confirmVezeeta() {
+    const doc = document.getElementById('docSelect').value;
+    const bookingCode = "VEZ-" + Math.floor(1000 + Math.random() * 9000);
+    
+    // إظهار الكود في المساحة المخصصة تحت الاختيارات دون مسح الشاشة
+    const resultDiv = document.getElementById('bookingResult');
+    resultDiv.innerHTML = `
+        <div style="background: #f0f7ff; padding: 20px; border-radius: 20px; border: 2px dashed #007bff; text-align: center; margin-top: 20px;">
+            <p style="font-size: 22px; margin: 0;">تم الحجز مع <strong>${doc}</strong></p>
+            <p style="font-size: 18px; color: #555; margin: 5px 0;">كود الحجز الخاص بك:</p>
+            <span style="font-size: 40px; font-weight: bold; color: #d9534f;">${bookingCode}</span>
+        </div>
+    `;
+    
+    // إخفاء زر التأكيد بعد الحجز لمنع التكرار
+    document.getElementById('confirmBtn').style.display = 'none';
+    
+    confetti(); // تأثير احتفالي عند الحجز
+}
+
+// 2. دالة الاحتفال (خارج دالة handleQuizAnswer)
+    function startCelebration() {
+        // تشغيل صوت النجاح (اختياري)
+        new Audio('1-sounds/success.mp3').play().catch(()=>{});
+        
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            
+            var particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    // 3. دالة الانتقال
+    function goToNextLevel() {
+        window.location.href = "page6.html"; 
+    }
+
+</script>
+
+
+</body>
+</html>

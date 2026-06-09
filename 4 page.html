@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title> الأمية الأبجدية 2 للعاديين </title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #eef2f7;
+            direction: rtl;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh; 
+            overflow: hidden; 
+            padding: 10px;
+        }
+
+        .image-1 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .image-1 img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+
+   
+
+        .signs-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            column-gap: 12px;
+            row-gap: 20px;
+            width: 98%;
+            max-width: 1600px;
+            padding: 5px;
+            overflow-y: auto;
+            flex: 1;
+            z-index: 5;
+            align-content: start; 
+            margin-top: 25px;
+        }
+
+        .sign-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 15px;
+            padding: 8px;
+            text-align: center;
+            box-shadow: 4px 4px 10px #ced1d6;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 160px; 
+            justify-content: space-between;
+            opacity: 0.5; 
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        .sign-card.active {
+            opacity: 1;
+            filter: grayscale(0);
+            cursor: pointer;
+            pointer-events: auto;
+            border: 2px solid #1888C9;
+            transform: scale(1.05);
+        }
+
+        .sign-card.completed {
+            opacity: 1; filter: grayscale(0);
+            background: #e8f5e9; border: 2px solid #4caf50;
+        }
+
+        .sign-card img {
+            width: 100%;
+            height: 90px; 
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .sign-card span {
+            font-size: 1.2rem;
+            color: white;
+            background: #1888C9;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* النافذة المنبثقة */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+
+        .detail-box {
+            background: white; padding: 30px; border-radius: 30px;
+            width: 90%; max-width: 450px; text-align: center; position: relative;
+        }
+
+        .close-x-circle {
+            position: absolute; top: 15px; left: 15px;
+            background: #ff4d4d; color: white; width: 30px; height: 30px;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer;
+        }
+
+        #pop-img { width: 100%; height: 200px; object-fit: contain; border-radius: 15px; margin-bottom: 15px; }
+        
+        /* الكلمة الأساسية (إسعاف، بريد...) */
+        .big-word { 
+            font-size: 3rem; 
+            color: #174572; 
+            margin-bottom: 10px; 
+            font-weight: bold;
+        }
+
+        /* جملة "تبدأ بحرف..." التي طلبتِ تكبيرها */
+        #pop-text { 
+            font-size: 2.2rem; 
+            color: #7a7a7a; 
+            font-weight: 700; 
+            margin-top: 10px;
+            display: block;
+        }
+
+               /* الشاشة الخضراء النهائية */
+        #finish-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 204, 113, 0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        #finish-screen h2 { font-size: 5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        #finish-screen p { font-size: 2rem; margin-bottom: 40px; }
+        .nav-btn {
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; background: white;
+            color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .nav-btn:hover { transform: scale(1.1); background: #f0f0f0; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+
+     h1.main-title { margin-top: 7px; color: #47b3fb; text-align: center; text-shadow: 4px 4px 6px #bce6fd; margin-bottom: 10px; font-size: 2.5rem; width: fit-content; margin-left: auto; margin-right: auto; border-bottom: 3px solid #47b3fb; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+
+<div id="finish-screen">
+    <i class="fas fa-check-circle" style="font-size: 8rem; margin-bottom: 20px;"></i>
+    <h2>أحسنت!</h2>
+    <p>لقد أتممت تعلم لافتات الشارع والخدمات</p>
+<a href="page220.html" style="text-decoration: none;">
+        <button class="nav-btn">الانتقال للمستوى التالي <i class="fas fa-arrow-left"></i></button>
+    </a></div>
+
+
+
+<div class="image-1"><img src="1-images/p33.jpg" alt="خلفية"></div>
+<h1 class="main-title">لافتات الشارع والخدمات</h1>
+<div class="signs-grid" id="grid">
+    <div class="sign-card active" data-letter="أ" data-word="إسعاف" data-explain="تبدأ بحرف الألف" data-audio="1-sounds/a.mp3" onclick="showDetail(this)"><img src="1-images/ا.jpg"><span>أ</span></div>
+    <div class="sign-card" data-letter="ب" data-word="بريد" data-explain="يبدأ بحرف الباء" data-audio="1-sounds/b.mp3" onclick="showDetail(this)"><img src="1-images/ب.jpg"><span>ب</span></div>
+    <div class="sign-card" data-letter="ت" data-word="تذاكر" data-explain="يبدأ بحرف التاء" data-audio="1-sounds/t.mp3" onclick="showDetail(this)"><img src="1-images/ت.jpg"><span>ت</span></div>
+    <div class="sign-card" data-letter="ث" data-word="ثلاجة" data-explain="تبدأ بحرف الثاء" data-audio="1-sounds/th.mp3" onclick="showDetail(this)"><img src="1-images/ث.jpeg"><span>ث</span></div>
+    <div class="sign-card" data-letter="ج" data-word="جوازات" data-explain="يبدأ بحرف الجيم" data-audio="1-sounds/j.mp3" onclick="showDetail(this)"><img src="1-images/ج.jpg"><span>ج</span></div>
+    <div class="sign-card" data-letter="ح" data-word="حريق" data-explain="تبدأ بحرف الحاء" data-audio="1-sounds/h.mp3" onclick="showDetail(this)"><img src="1-images/ح.jfif"><span>ح</span></div>
+    <div class="sign-card" data-letter="خ" data-word="خروج" data-explain="تبدأ بحرف الخاء" data-audio="1-sounds/kh.mp3" onclick="showDetail(this)"><img src="1-images/خ.jfif"><span>خ</span></div>
+    <div class="sign-card" data-letter="د" data-word="دخول" data-explain="تبدأ بحرف الدال" data-audio="1-sounds/d.mp3" onclick="showDetail(this)"><img src="1-images/د.jfif"><span>د</span></div>
+    <div class="sign-card" data-letter="ذ" data-word="ذرة" data-explain="يبدأ بحرف الذال" data-audio="1-sounds/z.mp3" onclick="showDetail(this)"><img src="1-images/ذ.jfif"><span>ذ</span></div>
+    <div class="sign-card" data-letter="ر" data-word="رخصة" data-explain="تبدأ بحرف الراء" data-audio="1-sounds/r.mp3" onclick="showDetail(this)"><img src="1-images/ر.jpg"><span>ر</span></div>
+    <div class="sign-card" data-letter="ز" data-word="زيت" data-explain="تبدأ بحرف الزاي" data-audio="1-sounds/zi.mp3" onclick="showDetail(this)"><img src="1-images/ز.jfif"><span>ز</span></div>
+    <div class="sign-card" data-letter="س" data-word="سكر" data-explain="يبدأ بحرف السين" data-audio="1-sounds/s.mp3" onclick="showDetail(this)"><img src="1-images/س.png"><span>س</span></div>
+    <div class="sign-card" data-letter="ش" data-word="شرطة" data-explain="يبدأ بحرف الشين" data-audio="1-sounds/sh.mp3" onclick="showDetail(this)"><img src="1-images/ش.jpg"><span>ش</span></div>
+    <div class="sign-card" data-letter="ص" data-word="صيدلية" data-explain="تبدأ بحرف الصاد" data-audio="1-sounds/sad.mp3" onclick="showDetail(this)"><img src="1-images/ص.png"><span>ص</span></div>
+    <div class="sign-card" data-letter="ض" data-word="ضوء" data-explain="يبدأ بحرف الضاد" data-audio="1-sounds/dad.mp3" onclick="showDetail(this)"><img src="1-images/ض.jpg"><span>ض</span></div>
+    <div class="sign-card" data-letter="ط" data-word="طريق" data-explain="يبدأ بحرف الطاء" data-audio="1-sounds/tah.mp3" onclick="showDetail(this)"><img src="1-images/ط.webp"><span>ط</span></div>
+    <div class="sign-card" data-letter="ظ" data-word="ظرف" data-explain="يبدأ بحرف الظاء" data-audio="1-sounds/zah.mp3" onclick="showDetail(this)"><img src="1-images/ظ.webp"><span>ظ</span></div>
+    <div class="sign-card" data-letter="ع" data-word="عيش" data-explain="يبدأ بحرف العين" data-audio="1-sounds/e.mp3" onclick="showDetail(this)"><img src="1-images/ع.avif"><span>ع</span></div>
+    <div class="sign-card" data-letter="غ" data-word="غسيل" data-explain="تبدأ بحرف الغين" data-audio="1-sounds/gh.mp3" onclick="showDetail(this)"><img src="1-images/غ.jpg"><span>غ</span></div>
+    <div class="sign-card" data-letter="ف" data-word="فاتورة" data-explain="تبدأ بحرف الفاء" data-audio="1-sounds/f.mp3" onclick="showDetail(this)"><img src="1-images/ف.jpg"><span>ف</span></div>
+    <div class="sign-card" data-letter="ق" data-word="قِف" data-explain="تبدأ بحرف القاف" data-audio="1-sounds/q.mp3" onclick="showDetail(this)"><img src="1-images/ق.jfif"><span>ق</span></div>
+    <div class="sign-card" data-letter="ك" data-word="كهرباء" data-explain="يبدأ بحرف الكاف" data-audio="1-sounds/k.mp3" onclick="showDetail(this)"><img src="1-images/ك.jpg"><span>ك</span></div>
+    <div class="sign-card" data-letter="ل" data-word="لبن" data-explain="يبدأ بحرف اللام" data-audio="1-sounds/l.mp3" onclick="showDetail(this)"><img src="1-images/ل.jpg"><span>ل</span></div>
+    <div class="sign-card" data-letter="م" data-word="مستشفى" data-explain="يبدأ بحرف الميم" data-audio="1-sounds/m.mp3" onclick="showDetail(this)"><img src="1-images/م.jpeg"><span>م</span></div>
+    <div class="sign-card" data-letter="ن" data-word="نظارة" data-explain="يبدأ بحرف النون" data-audio="1-sounds/n.mp3" onclick="showDetail(this)"><img src="1-images/ن.webp"><span>ن</span></div>
+    <div class="sign-card" data-letter="هـ" data-word="هاتف" data-explain="يبدأ بحرف الهاء" data-audio="1-sounds/h-h.mp3" onclick="showDetail(this)"><img src="1-images/ه.webp"><span>هـ</span></div>
+    <div class="sign-card" data-letter="و" data-word="وردة" data-explain="تبدأ بحرف الواو" data-audio="1-sounds/w.mp3" onclick="showDetail(this)"><img src="1-images/و.jpeg"><span>و</span></div> 
+    <div class="sign-card" data-letter="ي" data-word="يد" data-explain="تبدأ بحرف الياء" data-audio="1-sounds/y.mp3" onclick="showDetail(this)"><img src="1-images/ي.jpg"><span>ي</span></div>
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="detail-box">
+        <div class="close-x-circle" onclick="closeDetail()"><i class="fas fa-times"></i></div>
+        <img id="pop-img" src="">
+        <h2 class="big-word" id="pop-word"></h2>
+        <p id="pop-text"></p> 
+    </div>
+</div>
+
+<script>
+    let currentActiveCard = null;
+
+    function showDetail(card) {
+        currentActiveCard = card;
+        document.getElementById('pop-word').innerText = card.dataset.word;
+        document.getElementById('pop-text').innerText = card.dataset.explain;
+        document.getElementById('pop-img').src = card.querySelector('img').src; 
+        document.getElementById('overlay').style.display = 'flex';
+        new Audio(card.dataset.audio).play().catch(e => console.log("الصوت مفقود"));
+    }
+
+   
+    function closeDetail() {
+        document.getElementById('overlay').style.display = 'none';
+        
+        if (currentActiveCard) {
+            const letter = currentActiveCard.dataset.letter;
+            currentActiveCard.classList.remove('active');
+            currentActiveCard.classList.add('completed');
+            
+            const nextCard = currentActiveCard.nextElementSibling;
+            
+            if (nextCard && nextCard.classList.contains('sign-card')) {
+                nextCard.classList.add('active');
+                moveArrowTo(nextCard);
+            } else if (letter === "ي") {
+                // تفعيل الاحتفال عند الانتهاء من الياء
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => {
+                    startCelebration();
+                }, 600);
+            }
+        }
+    }
+
+    function moveArrowTo(card) {
+        const arrow = document.getElementById('mainArrow');
+        if(!arrow) return;
+        const rect = card.getBoundingClientRect();
+        arrow.style.display = 'block';
+        arrow.style.top = (rect.top + window.scrollY - 40) + 'px';
+        arrow.style.left = (rect.left + (rect.width / 2) - 10) + 'px';
+    }
+
+    window.onload = function() {
+        const firstCard = document.querySelector('.sign-card.active');
+        if (firstCard) moveArrowTo(firstCard);
+    };
+
+    function startCelebration() {
+        new Audio('1-sounds/success.mp3').play().catch(()=>{});
+        document.getElementById('finish-screen').style.display = 'flex';
+        
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            var particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random() * 0.2 + 0.1, y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random() * 0.2 + 0.7, y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    function goToNextLevel() {
+        window.location.href = "next_page.html"; 
+    }
+
+</script>
+</body>
+</html>
